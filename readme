@@ -1,0 +1,24 @@
+# 🚀 Mi Aplicación en Python
+
+Este proyecto es una aplicación en Python que utiliza **Flask** para el backend, **OpenAI** para la integración con IA y **python-dotenv** para la gestión de variables de entorno. También está equipada con **NumPy** para cálculos numéricos.
+
+## 📌 Requisitos
+Antes de empezar, asegúrate de tener **Python instalado** en tu sistema. Recomendamos usar Python 3.12 o versiones compatibles.
+
+## 🔧 Instalación
+1. **Clona el repositorio**:
+   ```sh
+   git clone https://github.com/tu-usuario/tu-repositorio.git
+   cd tu-repositorio
+
+
+2. **pip install flask openai python-dotenv numpy**
+
+pip install flask openai python-dotenv numpy
+
+3. **Creacion de .env**
+OPENAI_API_KEY=tu-api-key
+
+4. **Levantar la app**
+
+python app.py (debes estar en el root del proyecto)
