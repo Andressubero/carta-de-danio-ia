@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 import google.generativeai as genai
 from flask import Flask, render_template, request
 from sqlalchemy import text
@@ -14,8 +15,9 @@ db.init_app(app)
 
 # Configurar carpeta de uploads
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-
+load_dotenv()
 # Configurá tu API KEY de Gemini
+
 genai.configure(api_key=app.config['GEMINI_API_KEY'])
 
 @app.route('/', methods=['GET', 'POST'])
@@ -36,9 +38,14 @@ def index():
 
             try:
                 response = model.generate_content([
-                    prompt,
-                    genai.types.Content.Image(data=img_bytes, mime_type="image/jpeg")
-                ])
+                    {"role": "user", "parts": [
+                    {"text": prompt},
+                    {"inline_data": {
+                        "mime_type": "image/jpeg",
+                        "data": img_bytes
+        }}
+    ]}
+])
                 result = response.text
             except Exception as e:
                 result = f"Error: {e}"
