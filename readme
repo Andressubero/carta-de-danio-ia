@@ -17,6 +17,8 @@ Antes de empezar, asegúrate de tener **Python instalado** en tu sistema. Recome
 pip install flask openai python-dotenv numpy
 pip install google-generativeai
 
+pip install -r requirements.txt
+
 
 3. **Creacion de .env**
 OPENAI_API_KEY=tu-api-key

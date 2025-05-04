@@ -1,13 +1,22 @@
 import os
 import google.generativeai as genai
 from flask import Flask, render_template, request
+from sqlalchemy import text
+from config import Config
+from extensions import db
+from models.user import User  # Importás tu modelo
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config.from_object(Config)
+
+# Inicializar extensiones
+db.init_app(app)
+
+# Configurar carpeta de uploads
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Configurá tu API KEY de Gemini
-genai.configure(api_key="TU_API_KEY_AQUÍ")
+genai.configure(api_key=app.config['GEMINI_API_KEY'])
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -20,11 +29,9 @@ def index():
             image_path = os.path.join(app.config['UPLOAD_FOLDER'], image.filename)
             image.save(image_path)
 
-            # Cargar imagen como bytes
             with open(image_path, "rb") as img_file:
                 img_bytes = img_file.read()
 
-            # Crear modelo de Gemini multimodal
             model = genai.GenerativeModel("gemini-1.5-flash")
 
             try:
@@ -39,4 +46,12 @@ def index():
     return render_template("index.html", result=result)
 
 if __name__ == '__main__':
+    with app.app_context():
+        try:
+            db.session.execute(text('SELECT 1'))  # Prueba simple
+            print("✅ Conexión exitosa a la base de datos.")
+        except Exception as e:
+            print(f"❌ Error de conexión a la base de datos: {e}")
+        db.create_all()  # Crear tablas si no existen
     app.run(debug=True)
+
