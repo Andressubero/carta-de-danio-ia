@@ -5,7 +5,7 @@ from flask import Flask, render_template, request
 from sqlalchemy import text
 from config import Config
 from extensions import db
-from models.user import User  # Importás tu modelo
+from models.models import Base  # Importá el Base desde tu models
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -59,6 +59,6 @@ if __name__ == '__main__':
             print("✅ Conexión exitosa a la base de datos.")
         except Exception as e:
             print(f"❌ Error de conexión a la base de datos: {e}")
-        db.create_all()  # Crear tablas si no existen
+        Base.metadata.create_all(bind=db.engine)
     app.run(debug=True)
 
