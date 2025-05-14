@@ -38,3 +38,18 @@ def create_user_service(username, email, password, role_id):
     db.session.commit()
 
     return {'message': 'Usuario creado con éxito'}, 201
+
+def get_all_users_service():
+    try:
+        users = db.session.query(User).all()
+        users_data = [
+            {
+                'id': str(user.id),
+                'username': user.username,
+                'email': user.email,
+                'role_id': str(user.role_id)
+            } for user in users
+        ]
+        return {'users': users_data}, 200
+    except Exception as e:
+        return {'error': str(e)}, 500

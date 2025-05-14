@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from services.UserService import login_user, create_user_service
+from services.UserService import login_user, create_user_service, get_all_users_service
 
 def login_controller():
     data = request.get_json()
@@ -22,3 +22,7 @@ def create_user_controller():
 
     result, status_code = create_user_service(username, email, password, role_id)
     return jsonify(result), status_code
+
+def get_all_users_controller():
+    result, status_code = get_all_users_service()
+    return result, status_code
