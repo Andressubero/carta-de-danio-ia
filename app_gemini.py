@@ -2,13 +2,25 @@ import os
 from dotenv import load_dotenv
 import google.generativeai as genai
 from flask import Flask, render_template, request
+from sqlalchemy import text
+from config import Config
+from extensions import db
+from models.models import Base  # Importá el Base desde tu models
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config.from_object(Config)
+
+# Inicializar extensiones
+db.init_app(app)
+
+# Configurar carpeta de uploads
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 load_dotenv()
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+# Configurá tu API KEY de Gemini
+
+genai.configure(api_key=app.config['GEMINI_API_KEY'])
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -21,6 +33,7 @@ def index():
         if image:
             image_path = os.path.join(app.config['UPLOAD_FOLDER'], image.filename)
             image.save(image_path)
+
             with open(image_path, "rb") as img_file:
                 img_bytes = img_file.read()
 
@@ -56,4 +69,12 @@ def index():
     return render_template("index.html", result=result)
 
 if __name__ == '__main__':
+    with app.app_context():
+        try:
+            db.session.execute(text('SELECT 1'))  # Prueba simple
+            print("✅ Conexión exitosa a la base de datos.")
+        except Exception as e:
+            print(f"❌ Error de conexión a la base de datos: {e}")
+        Base.metadata.create_all(bind=db.engine)
     app.run(debug=True)
+
