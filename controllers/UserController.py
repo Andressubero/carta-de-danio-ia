@@ -9,7 +9,7 @@ def login_controller():
     token = login_user(username, password)
 
     if token:
-        return jsonify({'token': token})
+        return jsonify({'message': 'Login satisfactorio.', 'token': token})
     else:
         return jsonify({'message': 'Credenciales inválidas'}), 401
 
