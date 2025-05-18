@@ -8,11 +8,13 @@ from config import Config
 from extensions import db
 from models.models import Base
 from routes.UserRoutes import user_bp  # Importá el Base desde tu models
+from routes.vehicles_routes import vehicle_bp 
 
 load_dotenv()
 app = Flask(__name__)
 app.config.from_object(Config)
 app.register_blueprint(user_bp)
+app.register_blueprint(vehicle_bp)
 
 # Inicializar extensiones
 db.init_app(app)
