@@ -11,7 +11,7 @@ Base = declarative_base()
 # Tipo UUID compatible con múltiples bases de datos
 class GUID(TypeDecorator):
     impl = CHAR
-
+    cache_ok = True
     def load_dialect_impl(self, dialect):
         if dialect.name == 'postgresql':
             return dialect.type_descriptor(PG_UUID(as_uuid=True))
@@ -81,6 +81,7 @@ class Vehicle(Base):
     model = Column(String(255))
     brand = Column(String(255))
     year = Column(Integer)
+    plate = Column(String(255), unique=True)
 
     owner = relationship("User", back_populates="vehicles")
     type = relationship("VehicleType")
