@@ -12,7 +12,7 @@ def login_user(username, password):
 
     if user and check_password_hash(user.password, password):
         payload = {
-            'user': user.username,
+            'user_id': str(user.id),
             'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)
         }
         token = jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')
