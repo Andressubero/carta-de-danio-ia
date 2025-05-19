@@ -1,22 +1,15 @@
-import jwt
-import datetime
-from flask import current_app
-from extensions import db
-from werkzeug.security import check_password_hash
+from repositories.vehicle_repository import VehicleRepository
 from models.models import Vehicle
-from werkzeug.security import generate_password_hash
 import uuid
 
 def create(user_id, vehicle_type_id, model, brand, year, plate):
-    if not user_id or not vehicle_type_id or not model or not brand or not year or not plate:
-        return {'message': 'Faltan campos obligatorios'}, 400
-
-    existing = db.session.query(Vehicle).filter_by(plate=plate).first()
-    if existing:
+    # Verificar si el vehículo ya existe
+    if VehicleRepository.get_by_plate(plate):
         return {'message': 'Vehículo existente'}, 400
 
+    # Crear instancia del vehículo
     vehicle = Vehicle(
-        id=uuid.uuid4(),
+        id=str(uuid.uuid4()),  # Convertimos UUID a string
         user_id=user_id,
         vehicle_type_id=vehicle_type_id,
         model=model,
@@ -25,7 +18,8 @@ def create(user_id, vehicle_type_id, model, brand, year, plate):
         plate=plate
     )
 
-    db.session.add(vehicle)
-    db.session.commit()
-
-    return {'message': 'Vehículo creado con éxito'}, 201
+    try:
+        VehicleRepository.save(vehicle)
+        return {'message': 'Vehículo creado con éxito'}, 201
+    except Exception as e:
+        return {'message': f'Error al crear vehículo: {str(e)}'}, 500

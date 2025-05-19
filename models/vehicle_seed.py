@@ -1,37 +1,53 @@
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from app import db
 
-from .models import Vehicle
+from app import db
+from .models import Vehicle, User, VehicleType
 import uuid
 
-# Lista de partes a insertar
+# Lista de vehículos a insertar
 initial_vehicles = [
     {
-    "user_id": "9a40de0c-796f-49de-89a6-c33046397858",
-    "vehicle_type_id": "65267e97-a850-4f82-b08f-e29779a438e4",
-    "model": "Serie 3",
-    "brand": "BMW",
-    "year": 2012,
-    "plate": "ABC1234"
+        "user_email": "user@email.com",        # Buscar por email
+        "vehicle_type_name": "Sedán",          # Buscar por nombre
+        "model": "Serie 3",
+        "brand": "BMW",
+        "year": 2012,
+        "plate": "ABC1234"
     }
 ]
 
 def seed_vehicles():
     for item in initial_vehicles:
-        # Verifica si ya existe un vehiculo con esa patente
+        # Buscar el usuario por email
+        user = db.session.query(User).filter_by(email=item["user_email"]).first()
+        if not user:
+            print(f"❌ Usuario con email '{item['user_email']}' no encontrado. Ejecuta primero el seed de usuarios.")
+            continue
+
+        # Buscar el tipo de vehículo por nombre
+        vehicle_type = db.session.query(VehicleType).filter_by(name=item["vehicle_type_name"]).first()
+        if not vehicle_type:
+            print(f"❌ Tipo de vehículo '{item['vehicle_type_name']}' no encontrado. Ejecuta primero el seed de tipos de vehículos.")
+            continue
+
+        # Verificar si ya existe la patente
         existing = db.session.query(Vehicle).filter_by(plate=item["plate"]).first()
         if not existing:
             vehicle = Vehicle(
                 id=uuid.uuid4(),
-                user_id=item["user_id"],
-                vehicle_type_id=item["vehicle_type_id"],
+                user_id=user.id,
+                vehicle_type_id=vehicle_type.id,
                 model=item["model"],
                 brand=item["brand"],
                 year=item["year"],
                 plate=item["plate"]
             )
             db.session.add(vehicle)
+            print(f"✅ Vehículo '{item['plate']}' insertado.")
+        else:
+            print(f"ℹ️ Vehículo con patente '{item['plate']}' ya existe. Saltando.")
+
     db.session.commit()
-    print("Seeding de vehicles completado.")
+    print("✅ Seeding de vehicles completado.")
