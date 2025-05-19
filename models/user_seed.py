@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from app import db
 
-from .models import User
+from .models import User, Role
 import uuid
 
 # Lista de partes a insertar
@@ -11,14 +11,18 @@ initial_users = [
     {
     "username": "test_user",
     "email": "user@email.com",
-    "password": "password",
-    "role_id": "2c62c309-8762-4923-974e-cc220bb66c58"
+    "password": "password"
     }
 ]
 
 def seed_users():
     for item in initial_users:
-        # Verifica si ya existe una parte con ese nombre
+        # Obtener el Role dinámicamente
+        role = db.session.query(Role).filter_by(name="user").first()
+        if not role:
+            print("❌ Rol 'user' no encontrado. Ejecuta primero el seed de roles.")
+            continue
+        
         existing = db.session.query(User).filter_by(username=item["username"]).first()
         if not existing:
             user = User(
@@ -26,7 +30,7 @@ def seed_users():
                 username=item["username"],
                 email=item["email"],
                 password=item["password"],
-                role_id=item["role_id"]
+                role_id=role.id
             )
             db.session.add(user)
     db.session.commit()
