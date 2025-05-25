@@ -1,0 +1,41 @@
+<h1>Crear Estado del Vehículo</h1>
+
+<form action="/vehicle-state/create" method="POST" enctype="multipart/form-data">
+  <label for="vehicle_id">ID del Vehículo:</label><br>
+  <input type="text" name="vehicle_id" id="vehicle_id" required><br><br>
+
+  <label for="date">Fecha (YYYY-MM-DD):</label><br>
+  <input type="text" name="date" id="date" required><br><br>
+
+  <label for="lateral_right">Imagen lateral derecha:</label><br>
+  <input type="file" name="lateral_right"><br><br>
+
+  <label for="lateral_left">Imagen lateral izquierda:</label><br>
+  <input type="file" name="lateral_left"><br><br>
+
+  <label for="front">Imagen delantera:</label><br>
+  <input type="file" name="front"><br><br>
+
+  <label for="back">Imagen trasera:</label><br>
+  <input type="file" name="back"><br><br>
+
+  <label for="top">Imagen superior:</label><br>
+  <input type="file" name="top"><br><br>
+
+  <label for="states">Estados de partes (JSON):</label><br>
+  <textarea name="states" rows="10" cols="50" required>
+[
+    {
+        "part_id": "0241c88b-3b63-408c-9ce5-df1d593c5654",
+        "damages": [{"damage_type": "ABOLLADURA", "description": "abolladura descripción"}] 
+    }
+]
+  </textarea><br><br>
+
+  <button type="submit">Crear Estado</button>
+</form>
+
+{% if result_estado %}
+  <h2>Resultado de creación:</h2>
+  <pre>{{ result_estado }}</pre>
+{% endif %}

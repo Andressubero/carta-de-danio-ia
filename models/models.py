@@ -37,6 +37,14 @@ class DamageTypeEnum(str, enum.Enum):
     OTRO = "OTRO"
     SIN_DANO = "SIN_DANO"
 
+class ImageTypeEnum(str, enum.Enum):
+    LATERAL_RIGHT = "image_lateral_right"
+    LATERAL_LEFT = "image_lateral_left"
+    FRONT = "image_front"
+    BACK = "image_back"
+    TOP = "image_top"
+
+
 class VehicleTypePart(Base):
     __tablename__ = 'vehicle_type_part'
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
@@ -70,6 +78,7 @@ class Part(Base):
     __tablename__ = 'part'
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     name = Column(String(255))
+    image_type = Column(Enum(ImageTypeEnum), nullable=False)
 
     vehicle_types = relationship("VehicleTypePart", backref="part")
 
@@ -92,6 +101,7 @@ class VehicleState(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     vehicle_id = Column(GUID(), ForeignKey('vehicle.id'))
     date = Column(Date, default=date.today)
+    validation_reasons = Column(String(255), nullable=True)
 
     vehicle = relationship("Vehicle", back_populates="states")
     parts_state = relationship("VehiclePartState", back_populates="vehicle_state")
@@ -107,16 +117,26 @@ class VehiclePart(Base):
     part = relationship("Part")
     part_states = relationship("VehiclePartState", back_populates="vehicle_part")
 
+class Image(Base):
+    __tablename__ = 'images'
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    url = Column(String(255), nullable=False)
+
+    # Opcional: si querés la relación inversa
+    vehicle_part_states = relationship("VehiclePartState", back_populates="image")
+
+
 class VehiclePartState(Base):
     __tablename__ = 'vehicle_part_state'
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     vehicle_state_id = Column(GUID(), ForeignKey('vehicle_state.id'))
     vehicle_part_id = Column(GUID(), ForeignKey('vehicle_part.id'))
-    image_path = Column(String(255))
+    image_id = Column(GUID(), ForeignKey('images.id')) 
 
     vehicle_state = relationship("VehicleState", back_populates="parts_state")
     vehicle_part = relationship("VehiclePart", back_populates="part_states")
     damages = relationship("Damage", back_populates="vehicle_part_state")
+    image = relationship("Image", back_populates="vehicle_part_states")
 
 class Damage(Base):
     __tablename__ = 'damage'
