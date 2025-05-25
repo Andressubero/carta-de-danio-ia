@@ -7,6 +7,7 @@ from sqlalchemy import text
 from config import Config
 from extensions import db
 from models.models import Base
+from flask_cors import CORS
 from routes.UserRoutes import user_bp  # Importá el Base desde tu models
 from routes.vehicles_routes import vehicle_bp 
 from routes.vehicle_state_routes import vehicle_state_bp 
@@ -17,6 +18,7 @@ app.config.from_object(Config)
 app.register_blueprint(user_bp)
 app.register_blueprint(vehicle_bp)
 app.register_blueprint(vehicle_state_bp)
+CORS(app)
 
 # Inicializar extensiones
 db.init_app(app)
