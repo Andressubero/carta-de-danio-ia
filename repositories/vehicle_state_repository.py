@@ -35,7 +35,7 @@ class VehicleStateRepository:
                     id=uuid.uuid4(),
                     vehicle_state_id=new_state.id,
                     vehicle_part_id=vp.id,
-                    image_path=""  # Acá podés incluir manejo de imágenes si luego lo necesitás
+                    image_id="08c3d5b0-bfb2-487b-bec2-1a685ce1bf79"
                 )
                 db.session.add(vps)
                 db.session.flush()

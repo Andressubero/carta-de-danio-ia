@@ -99,6 +99,8 @@ if __name__ == '__main__':
         seed_users()
         from models.vehicle_seed import seed_vehicles
         seed_vehicles()
+        from models.image_seed import seed_images
+        seed_images()
 
     app.run(debug=True)
 

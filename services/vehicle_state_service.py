@@ -4,6 +4,7 @@ from extensions import db
 from utils.date import get_image_capture_date
 from models.models import ImageTypeEnum, Part
 from datetime import datetime, timedelta
+from constants.errors import errors
 
 def create(
 vehicle_id,
@@ -45,7 +46,7 @@ image_top=None
         
         part = db.session.query(Part).filter_by(id=part_id).first()
         if not part:
-            raise ValueError(f"Part con id {part_id} no encontrada")
+            raise ValueError(f"Part no encontrada: {part_id}")
         
         image_type_required = part.image_type
         image_file = available_images.get(image_type_required)
@@ -56,17 +57,17 @@ image_top=None
             )
 
         capture_date = None
-
+        
         try:
             capture_date = get_image_capture_date(image_file)
-            if capture_date < reference_date:
+            if capture_date.date() > reference_date.date():
                 validation_reasons.append({
-                    "reason": f"Imagen fue tomada antes de la fecha declarada ({capture_date} < {reference_date}), para la parte {part_id}"
+                    "reason": f"{errors['FECHA_TOMADA_ANTES']['codigo']}-{image_type_required}"
                 })
 
-            if capture_date - reference_date > timedelta(days=90):
+            if (reference_date.date() - capture_date.date()) > timedelta(days=90):
                 validation_reasons.append({
-                    "reason": f"Fecha declarada es mayor a 90 días antes de la imagen ({capture_date} - {reference_date}), para la parte {part_id}"
+                    "reason": f"{errors['FECHA_MAYOR_90_DIAS']['codigo']}-{image_type_required}"
                 })
         except ValueError as e:
             validation_reasons.append({"reason": "FECHA NO ENCONTRADA O FORMATO INVALIDO"})
