@@ -2,6 +2,7 @@ from extensions import db
 from models.models import Vehicle, VehicleState, VehiclePart, VehicleTypePart, VehiclePartState, Part, Damage, DamageTypeEnum
 import uuid
 from datetime import date
+from constants.errors import errors
 
 class VehicleStateRepository:
 
@@ -10,7 +11,7 @@ class VehicleStateRepository:
         try:
             vehicle = db.session.query(Vehicle).filter_by(id=vehicle_id).first()
             if not vehicle:
-                raise ValueError("Vehículo no encontrado")
+                raise ValueError(f"{errors['DATOS_INSUFICIENTES']['codigo']}")
 
             if not validation_reasons or not isinstance(validation_reasons, list):
                 validation_reasons = []  # Asegura que siempre sea una lista
@@ -31,17 +32,19 @@ class VehicleStateRepository:
 
             # Se crean el estado de las partes y sus daños
             for vp in vehicle_parts:
+                part_state = states_dict.get(str(vp.part_id))
+                image_path = part_state.get("image_path") if part_state else None
                 vps = VehiclePartState(
                     id=uuid.uuid4(),
                     vehicle_state_id=new_state.id,
                     vehicle_part_id=vp.id,
-                    image_id="08c3d5b0-bfb2-487b-bec2-1a685ce1bf79"
+                    image = image_path
                 )
                 db.session.add(vps)
                 db.session.flush()
 
                 # Verificamos si hay datos de daños enviados desde el front para esta parte
-                part_state = states_dict.get(str(vp.part_id))
+                
                 if part_state and part_state.get("damages"):
                     for dmg in part_state["damages"]:
                         damage = Damage(
@@ -68,4 +71,5 @@ class VehicleStateRepository:
             return new_state
         except Exception as e:
             db.session.rollback()
-            raise Exception(f"Error al guardar estado del vehículo: {str(e)}")
+            print(f" error: {e}")
+            raise Exception(f"{errors['ERROR_GUARDAR_ESTADO']['codigo']}")

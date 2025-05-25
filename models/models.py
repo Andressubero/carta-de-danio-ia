@@ -117,26 +117,17 @@ class VehiclePart(Base):
     part = relationship("Part")
     part_states = relationship("VehiclePartState", back_populates="vehicle_part")
 
-class Image(Base):
-    __tablename__ = 'images'
-    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    url = Column(String(255), nullable=False)
-
-    # Opcional: si querés la relación inversa
-    vehicle_part_states = relationship("VehiclePartState", back_populates="image")
-
 
 class VehiclePartState(Base):
     __tablename__ = 'vehicle_part_state'
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     vehicle_state_id = Column(GUID(), ForeignKey('vehicle_state.id'))
     vehicle_part_id = Column(GUID(), ForeignKey('vehicle_part.id'))
-    image_id = Column(GUID(), ForeignKey('images.id')) 
+    image = Column(String(255), nullable=True)
 
     vehicle_state = relationship("VehicleState", back_populates="parts_state")
     vehicle_part = relationship("VehiclePart", back_populates="part_states")
     damages = relationship("Damage", back_populates="vehicle_part_state")
-    image = relationship("Image", back_populates="vehicle_part_states")
 
 class Damage(Base):
     __tablename__ = 'damage'

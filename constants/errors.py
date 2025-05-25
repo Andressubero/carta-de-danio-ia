@@ -6,7 +6,7 @@ errors = {
     "FECHA_MAYOR_90_DIAS": {"codigo": "ERROR-05", "mensaje": "La fecha declarada es mayor a 90 días."},
     "FECHA_TOMADA_ANTES": {"codigo": "ERROR-06", "mensaje": "La imagen fue tomada antes de la fecha declarada."},
     "FALTA_IMAGEN": {"codigo": "ERROR-07", "mensaje": "Falta una imagen requerida."},
-    "PART_NO_ENCONTRADA": {"codigo": "ERROR-08", "mensaje": "No se encontró una de las partes especificadas."},
+    "PARTE_NO_ENCONTRADA": {"codigo": "ERROR-08", "mensaje": "No se encontró una de las partes especificadas."},
     "STATES_INVALIDO": {"codigo": "ERROR-09", "mensaje": "Estado de las partes inválido."},
     "STATES_DATOS_INCORRECTOS": {"codigo": "ERROR-10", "mensaje": "Datos en 'states' incorrectos o incompletos."},
     "FECHA_FORMATO_INCORRECTO": {"codigo": "ERROR-11", "mensaje": "Formato de fecha inválido. Se espera 'YYYY-MM-DD'."},

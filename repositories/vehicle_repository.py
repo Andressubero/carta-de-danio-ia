@@ -1,6 +1,7 @@
 from extensions import db
 from models.models import Vehicle, Part, VehiclePart, VehicleTypePart
 import uuid
+from constants.errors import errors
 
 class VehicleRepository:
     @staticmethod
@@ -32,4 +33,4 @@ class VehicleRepository:
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            raise Exception(f"Error al guardar vehículo: {str(e)}")
+            raise Exception(f"{errors['ERROR_GUARDAR_VEHICULO']['codigo']}: {str(e)}")
