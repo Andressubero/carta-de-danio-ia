@@ -7,7 +7,7 @@ from constants.errors import errors
 class VehicleStateRepository:
 
     @staticmethod
-    def save(vehicle_id, states_from_body, validation_reasons):
+    def save(vehicle_id, states_from_body, validation_reasons, declared_date):
         try:
             vehicle = db.session.query(Vehicle).filter_by(id=vehicle_id).first()
             if not vehicle:
@@ -20,7 +20,7 @@ class VehicleStateRepository:
             validation_reasons_string = ", ".join(item["reason"] for item in validation_reasons)
 
             # Se crea el estado del vehiculo
-            new_state = VehicleState(id=uuid.uuid4(), vehicle_id=vehicle.id, date=date.today(), validation_reasons=validation_reasons_string if validation_reasons_string else None)
+            new_state = VehicleState(id=uuid.uuid4(), vehicle_id=vehicle.id, creation_date=date.today(),declared_date=declared_date, validation_reasons=validation_reasons_string if validation_reasons_string else None)
             db.session.add(new_state)
             db.session.flush()
 
@@ -73,3 +73,13 @@ class VehicleStateRepository:
             db.session.rollback()
             print(f" error: {e}")
             raise Exception(f"{errors['ERROR_GUARDAR_ESTADO']['codigo']}")
+
+
+    @staticmethod
+    def get_all_by_vehicle_id(vehicle_id):
+        return (
+            db.session.query(VehicleState)
+            .filter_by(vehicle_id=vehicle_id)
+            .order_by(VehicleState.declared_date.asc())
+            .all()
+        )

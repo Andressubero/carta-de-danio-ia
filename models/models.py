@@ -95,13 +95,15 @@ class Vehicle(Base):
     owner = relationship("User", back_populates="vehicles")
     type = relationship("VehicleType")
     states = relationship("VehicleState", back_populates="vehicle")
+    parts = relationship("VehiclePart", back_populates="vehicle", cascade="all, delete-orphan")
 
 class VehicleState(Base):
     __tablename__ = 'vehicle_state'
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     vehicle_id = Column(GUID(), ForeignKey('vehicle.id'))
-    date = Column(Date, default=date.today)
+    creation_date = Column(Date, default=date.today)
     validation_reasons = Column(String(255), nullable=True)
+    declared_date = Column(Date, default=date.today)
 
     vehicle = relationship("Vehicle", back_populates="states")
     parts_state = relationship("VehiclePartState", back_populates="vehicle_state")
@@ -113,9 +115,10 @@ class VehiclePart(Base):
     vehicle_id = Column(GUID(), ForeignKey('vehicle.id'))
     part_id = Column(GUID(), ForeignKey('part.id'))
 
-    vehicle = relationship("Vehicle")
+    vehicle = relationship("Vehicle", back_populates="parts")
     part = relationship("Part")
     part_states = relationship("VehiclePartState", back_populates="vehicle_part")
+
 
 
 class VehiclePartState(Base):

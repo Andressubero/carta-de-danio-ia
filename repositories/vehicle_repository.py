@@ -1,4 +1,5 @@
 from extensions import db
+from sqlalchemy.orm import joinedload
 from models.models import Vehicle, Part, VehiclePart, VehicleTypePart
 import uuid
 from constants.errors import errors
@@ -34,3 +35,13 @@ class VehicleRepository:
         except Exception as e:
             db.session.rollback()
             raise Exception(f"{errors['ERROR_GUARDAR_VEHICULO']['codigo']}: {str(e)}")
+
+
+    def get_by_id(id):
+        return db.session.query(Vehicle).filter_by(id=vehicle_id).first()
+    
+    def get_vehicle_with_parts(vehicle_id):
+        return db.session.query(Vehicle)\
+            .options(joinedload(Vehicle.parts))\
+            .filter(Vehicle.id == vehicle_id)\
+            .first()

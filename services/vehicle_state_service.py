@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from repositories.vehicle_state_repository import VehicleStateRepository
+from services.vehicle_service import get_vehicle_with_parts
 from extensions import db
 from utils.date import get_image_capture_date
 from models.models import ImageTypeEnum, Part
@@ -16,6 +17,16 @@ def simple_secure_filename(filename):
     """
     filename = re.sub(r'[^A-Za-z0-9_.-]', '_', filename)
     return filename
+
+def validate_parts(vehicle_parts, parts_from_body):
+    backend_part_ids = {str(part.part_id) for part in vehicle_parts}
+    frontend_part_ids = {str(p["part_id"]) for p in parts_from_body}
+
+    if len(frontend_part_ids) != len(backend_part_ids):
+        return False, "Cantidad de partes no coincide"
+    if frontend_part_ids != backend_part_ids:
+        return False, "Los IDs de partes no coinciden"
+    return True, "Las partes coinciden"
 
 def create(
 vehicle_id,
@@ -45,6 +56,19 @@ image_top=None
         reference_date = datetime.strptime(date, "%Y-%m-%d")
     except ValueError:
         raise ValueError(f"{errors['FECHA_FORMATO_INCORRECTO']['codigo']}")
+    
+    vehicle = get_vehicle_with_parts(vehicle_id)
+    if vehicle is None:
+        raise ValueError(f"{errors['ERROR-16']['mensaje']}")
+    
+    previous_states = VehicleStateRepository.get_all_by_vehicle_id(vehicle_id)
+    if not previous_states:
+        # states debe coincidir con el length porque es el primer estado
+        #is_valid, msg = validate_parts(vehicle.parts, states)
+        #if not is_valid:
+        #    raise ValueError(f"{errors['DATOS_INSUFICIENTES']['codigo']}: {msg}")
+        if not all([image_lateral_right, image_lateral_left, image_front, image_back, image_top]):
+            raise ValueError(f"{errors['DATOS_INSUFICIENTES']['codigo']}: El primer state requiere todas las imágenes") 
 
     validation_reasons = []
     saved_images = set()
@@ -99,7 +123,10 @@ image_top=None
             unique_id = str(uuid.uuid4())
             safe_name = simple_secure_filename(f"{image_type_required}-{unique_id}{ext}")
             image_path = os.path.join(app.config['UPLOAD_FOLDER'], vehicle_id, safe_name)
-            image_file.save(image_path)
+            try:
+                image_file.save(image_path)
+            except Exception as e:
+                raise RuntimeError(f"{errors['ERROR_GUARDANDO_LA_IMAGEN']['mensaje']}")
             saved_images.add(image_type_required)
             image_paths[image_type_required] = image_path
             # Leer la imagen en bytes
@@ -126,4 +153,4 @@ image_top=None
 
     print(f"Estructura a enviar a la ia { grouped_structure}")
 
-    return VehicleStateRepository.save(vehicle_id, states, validation_reasons)
+    return VehicleStateRepository.save(vehicle_id, states, validation_reasons, date)

@@ -13,5 +13,7 @@ errors = {
     "DATOS_INSUFICIENTES": {"codigo": "ERROR-12", "mensaje": "Faltan datos necesarios para crear el estado del vehículo."},
     "ERROR_GUARDAR_VEHICULO": {"codigo": "ERROR-13", "mensaje": "Error al guardar el vehículo en la base de datos."},
     "VEHICULO_NO_ENCONTRADO": {"codigo": "ERROR-14", "mensaje": "El vehículo no fue encontrado."},
-    "ERROR_GUARDAR_ESTADO": {"codigo": "ERROR-15", "mensaje": "Error al guardar el estado del vehículo en la base de datos."}
+    "ERROR_GUARDAR_ESTADO": {"codigo": "ERROR-15", "mensaje": "Error al guardar el estado del vehículo en la base de datos."},
+    "VEHICULO_NO_ENCONTRADO": {"codigo": "ERROR-16", "mensaje": "Vehiculo no encontrado."},
+    "ERROR_GUARDANDO_LA_IMAGEN": {"codigo": "ERROR-17", "mensaje": "Error inesperado guardando la imagen"}
 }
