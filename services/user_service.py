@@ -1,10 +1,11 @@
 import jwt
 import datetime
-from flask import current_app, jsonify
+from flask import current_app
 from extensions import db
 from werkzeug.security import check_password_hash
 from models.models import User
 from werkzeug.security import generate_password_hash
+from services.role_service import get_role_by_name
 import uuid
 
 def login_user(username, password):
@@ -20,8 +21,8 @@ def login_user(username, password):
 
     return None
 
-def create_user_service(username, email, password, role_id):
-    if not username or not email or not password or not role_id:
+def create_user_service(username, email, password):
+    if not username or not email or not password:
         return {"success": False, "message": "Faltan datos"}, 200
     
     existing_user = db.session.query(User).filter_by(username=username).first()
@@ -39,7 +40,7 @@ def create_user_service(username, email, password, role_id):
         username=username,
         email=email,
         password=hashed_password,
-        role_id=role_id
+        role_id=get_role_by_name("user").id
     )
 
     db.session.add(new_user)
