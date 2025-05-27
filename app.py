@@ -18,7 +18,9 @@ app.config.from_object(Config)
 app.register_blueprint(user_bp)
 app.register_blueprint(vehicle_bp)
 app.register_blueprint(vehicle_state_bp)
-CORS(app)
+#CORS(app)
+CORS(app,  supports_credentials=True ,origins=["http://localhost:5173"],)
+
 
 # Inicializar extensiones
 db.init_app(app)
