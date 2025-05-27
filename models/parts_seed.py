@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from app import db
 
-from .models import Part
+from .models import Part, ImageTypeEnum
 import uuid
 
 # Lista de partes a insertar
@@ -39,12 +39,30 @@ initial_parts = [
 "Retrovisor izquierdo"
 ]
 
+def infer_image_type(part_name: str) -> ImageTypeEnum:
+    name = part_name.lower()
+    if "derech" in name:
+        return ImageTypeEnum.LATERAL_RIGHT
+    elif "izquierd" in name:
+        return ImageTypeEnum.LATERAL_LEFT
+    elif "capó" in name or "parabrisas" in name or "luz delantera" in name or "paragolpes delantero" in name or "guarda fango delantero" in name:
+        return ImageTypeEnum.FRONT
+    elif "baúl" in name or "luneta" in name or "paragolpes trasero" in name or "luz trasera" in name or "guarda fango trasero" in name:
+        return ImageTypeEnum.BACK
+    elif "techo" in name:
+        return ImageTypeEnum.TOP
+    else:
+        # Valor por defecto en caso de que no coincida nada (puedes ajustar esto)
+        return ImageTypeEnum.TOP
+
+
 def seed_parts():
     for name in initial_parts:
         # Verifica si ya existe una parte con ese nombre
         existing = db.session.query(Part).filter_by(name=name).first()
         if not existing:
-            part = Part(id=uuid.uuid4(), name=name)
+            image_type = infer_image_type(name)
+            part = Part(id=uuid.uuid4(), name=name, image_type=image_type)
             db.session.add(part)
     db.session.commit()
     print("Seeding de parts completado.")

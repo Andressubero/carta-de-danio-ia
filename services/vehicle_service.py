@@ -1,3 +1,4 @@
+from sqlalchemy.orm import joinedload
 from repositories.vehicle_repository import VehicleRepository
 from models.models import Vehicle
 import uuid
@@ -23,3 +24,10 @@ def create(user_id, vehicle_type_id, model, brand, year, plate):
         return {'message': 'Vehículo creado con éxito'}, 201
     except Exception as e:
         return {'message': f'Error al crear vehículo: {str(e)}'}, 500
+
+
+def get_vehicle_by_id(id):
+    return VehicleRepository.get_by_id(id)
+
+def get_vehicle_with_parts(vehicle_id):
+    return VehicleRepository.get_vehicle_with_parts(vehicle_id)

@@ -6,7 +6,7 @@ from app import db
 from .models import User, Role
 import uuid
 
-# Lista de partes a insertar
+# Lista de usuarios a insertar
 initial_users = [
     {
     "username": "test_user",

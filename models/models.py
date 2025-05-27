@@ -37,6 +37,14 @@ class DamageTypeEnum(str, enum.Enum):
     OTRO = "OTRO"
     SIN_DANO = "SIN_DANO"
 
+class ImageTypeEnum(str, enum.Enum):
+    LATERAL_RIGHT = "image_lateral_right"
+    LATERAL_LEFT = "image_lateral_left"
+    FRONT = "image_front"
+    BACK = "image_back"
+    TOP = "image_top"
+
+
 class VehicleTypePart(Base):
     __tablename__ = 'vehicle_type_part'
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
@@ -70,6 +78,7 @@ class Part(Base):
     __tablename__ = 'part'
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     name = Column(String(255))
+    image_type = Column(Enum(ImageTypeEnum), nullable=False)
 
     vehicle_types = relationship("VehicleTypePart", backref="part")
 
@@ -86,12 +95,15 @@ class Vehicle(Base):
     owner = relationship("User", back_populates="vehicles")
     type = relationship("VehicleType")
     states = relationship("VehicleState", back_populates="vehicle")
+    parts = relationship("VehiclePart", back_populates="vehicle", cascade="all, delete-orphan")
 
 class VehicleState(Base):
     __tablename__ = 'vehicle_state'
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     vehicle_id = Column(GUID(), ForeignKey('vehicle.id'))
-    date = Column(Date, default=date.today)
+    creation_date = Column(Date, default=date.today)
+    validation_reasons = Column(String(255), nullable=True)
+    declared_date = Column(Date, default=date.today)
 
     vehicle = relationship("Vehicle", back_populates="states")
     parts_state = relationship("VehiclePartState", back_populates="vehicle_state")
@@ -103,16 +115,18 @@ class VehiclePart(Base):
     vehicle_id = Column(GUID(), ForeignKey('vehicle.id'))
     part_id = Column(GUID(), ForeignKey('part.id'))
 
-    vehicle = relationship("Vehicle")
+    vehicle = relationship("Vehicle", back_populates="parts")
     part = relationship("Part")
     part_states = relationship("VehiclePartState", back_populates="vehicle_part")
+
+
 
 class VehiclePartState(Base):
     __tablename__ = 'vehicle_part_state'
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     vehicle_state_id = Column(GUID(), ForeignKey('vehicle_state.id'))
     vehicle_part_id = Column(GUID(), ForeignKey('vehicle_part.id'))
-    image_path = Column(String(255))
+    image = Column(String(255), nullable=True)
 
     vehicle_state = relationship("VehicleState", back_populates="parts_state")
     vehicle_part = relationship("VehiclePart", back_populates="part_states")
