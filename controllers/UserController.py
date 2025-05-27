@@ -1,5 +1,5 @@
-from flask import request, jsonify
-from services.UserService import login_user, create_user_service, get_all_users_service
+from flask import request, jsonify, make_response
+from services.user_service import login_user, create_user_service, get_all_users_service
 
 def login_controller():
     data = request.get_json()
@@ -9,18 +9,25 @@ def login_controller():
     token = login_user(username, password)
 
     if token:
-        return jsonify({'message': 'Login satisfactorio.', 'token': token})
+        response = make_response(jsonify({'message': 'Login satisfactorio'}))
+        response.set_cookie(
+            key='token',
+            value=token,
+            httponly=True,        # protege contra JS (XSS) 
+            samesite='Lax',       # evita CSRF básicos
+            secure=False          # ⚠️ ponelo en True si usás HTTPS. Si secure=True, la cookie solo se enviará bajo HTTPS
+        )
+        return response
     else:
-        return jsonify({'message': 'Credenciales inválidas'}), 401
+        return jsonify({'message': 'Credenciales inválidas'}), 200
 
 def create_user_controller():
     data = request.get_json()
     username = data.get('username')
     email = data.get('email')
     password = data.get('password')
-    role_id = data.get('role_id')
 
-    result, status_code = create_user_service(username, email, password, role_id)
+    result, status_code = create_user_service(username, email, password)
     return jsonify(result), status_code
 
 def get_all_users_controller():

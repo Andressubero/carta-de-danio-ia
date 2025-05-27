@@ -5,6 +5,7 @@ from extensions import db
 from werkzeug.security import check_password_hash
 from models.models import User
 from werkzeug.security import generate_password_hash
+from services.role_service import get_role_by_name
 import uuid
 
 def login_user(username, password):
@@ -20,9 +21,17 @@ def login_user(username, password):
 
     return None
 
-def create_user_service(username, email, password, role_id):
-    if not username or not email or not password or not role_id:
-        return {'message': 'Faltan campos obligatorios'}, 400
+def create_user_service(username, email, password):
+    if not username or not email or not password:
+        return {"success": False, "message": "Faltan datos"}, 200
+    
+    existing_user = db.session.query(User).filter_by(username=username).first()
+    if existing_user:
+        return {"success": False, "message": "Ya hay una cuenta registrada con este usuario"}, 200
+    
+    existing_email = db.session.query(User).filter_by(email=email).first()
+    if existing_email:
+        return {"success": False, "message": "Ya hay una cuenta registrada con este email"}, 200
 
     hashed_password = generate_password_hash(password)
 
@@ -31,13 +40,13 @@ def create_user_service(username, email, password, role_id):
         username=username,
         email=email,
         password=hashed_password,
-        role_id=role_id
+        role_id=get_role_by_name("user").id
     )
 
     db.session.add(new_user)
     db.session.commit()
 
-    return {'message': 'Usuario creado con éxito'}, 201
+    return {"success": True, "message": "Usuario registrado con éxito"}, 201
 
 def get_all_users_service():
     try:

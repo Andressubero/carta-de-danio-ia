@@ -3,8 +3,8 @@ from dotenv import load_dotenv
 
 class Config:
     load_dotenv()
-    SQL_USER = os.getenv("SQL_USER", "miusuario")
-    SQL_PASSWORD = os.getenv("SQL_PASSWORD", "miclave123")
+    SQL_USER = os.getenv("SQL_USER", "root")
+    SQL_PASSWORD = os.getenv("SQL_PASSWORD", "")
     SQL_DATABASE_NAME = os.getenv("SQL_DATABASE_NAME", "carta_danio_ia")
     SQL_PORT = os.getenv("SQL_PORT", "3306")
 
