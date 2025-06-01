@@ -65,29 +65,3 @@ def call_llm(data, action):
         return response.text
     except Exception as e:
         print(f'Error: {e}')
-
-if __name__ == '__main__':
-    params_primer_validacion = [
-	    {	#imagen lateral izquierda
-		    'image': 'alfaRomeoAntes.png',
-		    'parts': [
-                { 
-                    'part': 'puerta delantera izquierda', 
-                    'damages': ['abolladura', 'rayon' ]
-                }
-            ]
-        },
-	    {	#imagen lateral derecha
-		    'image': 'alfaRomeoDespues.png',
-		    'parts': [
-                { 
-                    'part': 'puerta delantera derecha', 
-                    'damages': ['abolladura', 'rayon' ]
-                }
-            ]
-        }
-    ]
-
-    #response = call_llm(params_primer_validacion, 'ALTA')
-    response = call_llm(params_primer_validacion, 'SINIESTRO')
-    print(response)

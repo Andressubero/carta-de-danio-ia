@@ -1,3 +1,4 @@
 {
-    "primer-prompt": "texto de ejemplo"
+    "primer-prompt": "primero.txt",
+    "segundo-prompt": "segundo.txt"
 }
