@@ -1,4 +1,6 @@
 .env
 .pyc
+prompts/paths.json
+prompts/*.txt
 /__pycache__
 /*/__pycache__
