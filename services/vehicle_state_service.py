@@ -28,6 +28,15 @@ def validate_parts(vehicle_parts, parts_from_body):
         return False, "Los IDs de partes no coinciden"
     return True, "Las partes coinciden"
 
+def get_all():
+    """
+    Obtiene todos los estados de vehículos.
+    """
+    try:
+        return VehicleStateRepository.get_all()
+    except Exception as e:
+        raise RuntimeError(f"Error al obtener los estados de vehículos: {str(e)}")
+
 def create(
 vehicle_id,
 states,

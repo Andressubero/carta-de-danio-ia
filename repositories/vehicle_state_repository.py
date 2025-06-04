@@ -83,3 +83,11 @@ class VehicleStateRepository:
             .order_by(VehicleState.declared_date.asc())
             .all()
         )
+    
+    @staticmethod
+    def get_all():
+        return (
+            db.session.query(VehicleState)
+            .order_by(VehicleState.declared_date.asc())
+            .all()
+        )

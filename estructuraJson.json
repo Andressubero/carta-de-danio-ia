@@ -1,0 +1,46 @@
+//prompt4
+Actuá como un inspector de vehículos. Analizá la imagen actual proporcionada y, si corresponde, comparala con una imagen de referencia. Respondé únicamente en formato JSON con la estructura indicada. No incluyas texto adicional.
+
+1. Primero, verificá si la imagen actual contiene un vehículo real.
+   - Si no se detecta un vehículo real (por ejemplo: juguete, imagen renderizada, auto de videojuego, o imagen inválida), devolvé únicamente este JSON:
+
+{
+  "vehiculo_valido": false,
+  "motivo_invalidez": "no se detecta vehículo / es un juguete / es una imagen renderizada / es un videojuego / imagen genérica de stock / otro"
+}
+
+2. Si la imagen contiene un vehículo real, devolvé el siguiente JSON estructurado. **Importante**: si el vehículo de la imagen actual y el de la referencia no son la misma unidad, no evalúes daños ni comparación.
+
+{
+  "vehiculo_valido": true,
+  "tipo_imagen": "vehiculo_real | vehiculo_juguete | render_videojuego | imagen_stock | otro",
+  "tipo_vehiculo": "sedán | SUV | camioneta | otro | desconocido",
+  "modelo_estimado": "Toyota Corolla 2018 (si puede estimarse, sino 'desconocido')",
+  "calidad_imagen": "buena | media | baja",
+  "es_misma_unidad_que_referencia": true | false | "no_comparada",
+  "confianza_misma_unidad": 0-100,  // Porcentaje de certeza de que es el mismo vehículo
+  "daños": [],  // solo completá si es_misma_unidad_que_referencia = true
+  "porcentaje_danio_vehiculo_total": "Ej: 12% del valor estimado del vehículo",  // Solo si hay daños
+
+// respuesta api de validación de vehículo
+{
+  "vehiculo_valido": true,
+  "tipo_imagen": "vehiculo_real",
+  "tipo_vehiculo": "sedán",
+  "modelo_estimado": "Nissan Sentra",
+  "calidad_imagen": "buena",
+  "es_misma_unidad_que_referencia": true,
+  "confianza_misma_unidad": 100,
+  "daños": [
+    {
+      "tipo_daño": "abolladura",
+      "ubicacion": "parachoques trasero",
+      "severidad": "moderado",
+      "porcentaje_seguridad": 95,
+      "presente_en_referencia": false
+    }
+  ],
+  "porcentaje_danio_vehiculo_total": "5%",
+  "comentarios_adicionales": "Daño en paragolpes trasero, aparentemente por impacto.",
+  "comparacion_con_referencia": "Nuevo daño detectado en paragolpes trasero"
+}
