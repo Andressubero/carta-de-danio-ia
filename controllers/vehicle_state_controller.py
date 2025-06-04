@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from services.vehicle_state_service import create
+from services.vehicle_state_service import get_all
 import json
 
 def create_vehicle_state():
@@ -33,5 +34,16 @@ def create_vehicle_state():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+def get_all_vehicle_state():
+    try:
+        vehicle_states = get_all()
+        if not vehicle_states:
+            return jsonify({"message": "No se encontraron estados de vehículos"}), 404
+
+        serialized_states = [vs.to_dict() for vs in vehicle_states]
+        return jsonify(serialized_states), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 

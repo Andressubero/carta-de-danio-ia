@@ -107,6 +107,18 @@ class VehicleState(Base):
 
     vehicle = relationship("Vehicle", back_populates="states")
     parts_state = relationship("VehiclePartState", back_populates="vehicle_state")
+    
+    def to_dict(self):
+        return {
+            "id": str(self.id),
+            "vehicle_id": str(self.vehicle_id),
+            "creation_date": self.creation_date.isoformat(),
+            "validation_reasons": self.validation_reasons,
+            "declared_date": self.declared_date.isoformat() if self.declared_date else None
+        }
+    
+    
+    
 
 class VehiclePart(Base):
     __tablename__ = 'vehicle_part'
