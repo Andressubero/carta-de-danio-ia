@@ -31,3 +31,6 @@ def get_vehicle_by_id(id):
 
 def get_vehicle_with_parts(vehicle_id):
     return VehicleRepository.get_vehicle_with_parts(vehicle_id)
+
+def get_vehicles(user_id):
+    return VehicleRepository.get_all_by_user(user_id)

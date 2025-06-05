@@ -40,6 +40,9 @@ class VehicleRepository:
     def get_by_id(id):
         return db.session.query(Vehicle).filter_by(id=vehicle_id).first()
     
+    def get_all_by_user(id):     
+        return db.session.query(Vehicle).filter_by(user_id=id).all()
+    
     def get_vehicle_with_parts(vehicle_id):
         return db.session.query(Vehicle)\
             .options(joinedload(Vehicle.parts))\
