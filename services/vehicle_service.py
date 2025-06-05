@@ -6,7 +6,7 @@ import uuid
 def create(user_id, vehicle_type_id, model, brand, year, plate):
     # Verificar si el vehículo ya existe
     if VehicleRepository.get_by_plate(plate):
-        return {'message': 'Vehículo existente'}, 400
+        return {'message': 'Vehículo existente', 'success': False}, 200
 
     # Crear instancia del vehículo
     vehicle = Vehicle(
@@ -21,7 +21,7 @@ def create(user_id, vehicle_type_id, model, brand, year, plate):
 
     try:
         VehicleRepository.save(vehicle)
-        return {'message': 'Vehículo creado con éxito'}, 201
+        return {'message': 'Vehículo creado con éxito', 'success': True}, 201
     except Exception as e:
         return {'message': f'Error al crear vehículo: {str(e)}'}, 500
 

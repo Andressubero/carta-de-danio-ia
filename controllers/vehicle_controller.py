@@ -1,10 +1,9 @@
-from flask import request, jsonify
-from services.vehicle_service import  create
+from flask import request, jsonify, g
+from services.vehicle_service import create
 
 def create_vehicle():
     data = request.get_json()
-    # el user_id se debe sacar del jwt y añadirlo en la siguiente linea
-    user_id = data.get('user_id')
+    user_id = g.user_id
     vehicle_type_id = data.get('vehicle_type_id')
     model = data.get('model')
     brand = data.get('brand')
