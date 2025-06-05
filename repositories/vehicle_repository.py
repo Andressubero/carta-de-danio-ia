@@ -38,6 +38,9 @@ class VehicleRepository:
 
 
     def get_by_id(id):
+        vehicle_id = Vehicle.id
+        if not vehicle_id:
+            return None
         return db.session.query(Vehicle).filter_by(id=vehicle_id).first()
     
     def get_all_by_user(id):     
