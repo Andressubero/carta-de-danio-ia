@@ -9,7 +9,7 @@ def login_controller():
     token = login_user(username, password)
 
     if token:
-        response = make_response(jsonify({'message': 'Login satisfactorio'}))
+        response = make_response(jsonify({'message': 'Login satisfactorio', 'token': token}))
         response.set_cookie(
             key='token',
             value=token,

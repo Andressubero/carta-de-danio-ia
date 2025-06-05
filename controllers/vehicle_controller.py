@@ -1,3 +1,5 @@
+from flask import request, jsonify, g
+from services.vehicle_service import create, get_vehicles
 from flask import request, jsonify
 from services.vehicle_service import  create
 from services.vehicle_service import get_vehicle_by_id
@@ -5,8 +7,7 @@ from services.vehicle_service import get_vehicle_by_id
 
 def create_vehicle():
     data = request.get_json()
-    # el user_id se debe sacar del jwt y añadirlo en la siguiente linea
-    user_id = data.get('user_id')
+    user_id = g.user_id
     vehicle_type_id = data.get('vehicle_type_id')
     model = data.get('model')
     brand = data.get('brand')
@@ -16,6 +17,23 @@ def create_vehicle():
     result, status_code = create(user_id, vehicle_type_id, model, brand, year, plate)
     return jsonify(result), status_code
 
+def get_vehicles_by_user_controller():
+    user_id = g.user_id
+    vehicles = get_vehicles(user_id)
+
+    vehicle_list = [
+        {
+            "id": v.id,
+            "brand": v.brand,
+            "model": v.model,
+            "year": v.year,
+            "plate": v.plate,
+            "vehicle_type_id": v.vehicle_type_id
+        }
+        for v in vehicles
+    ]
+
+    return jsonify(vehicle_list), 200
 def get_vehicle_by_id(vehicle_id):
     try:
         vehicle = get_vehicle_by_id(vehicle_id)

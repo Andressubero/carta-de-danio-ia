@@ -11,15 +11,17 @@ from flask_cors import CORS
 from routes.UserRoutes import user_bp  # Importá el Base desde tu models
 from routes.vehicles_routes import vehicle_bp 
 from routes.vehicle_state_routes import vehicle_state_bp 
+from routes.vehicle_type_routes import vehicle_types_bp
 
 load_dotenv()
 app = Flask(__name__)
+CORS(app, supports_credentials=True ,origins=["http://localhost:5173"],)
 app.config.from_object(Config)
 app.register_blueprint(user_bp)
 app.register_blueprint(vehicle_bp)
+app.register_blueprint(vehicle_types_bp)
 app.register_blueprint(vehicle_state_bp)
 #CORS(app)
-CORS(app,  supports_credentials=True ,origins=["http://localhost:5173"],)
 
 
 # Inicializar extensiones
