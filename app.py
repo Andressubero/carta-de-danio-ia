@@ -1,7 +1,6 @@
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
-import google.generativeai as genai
 from flask import Flask, render_template, request
 from sqlalchemy import text
 from config import Config
@@ -12,6 +11,7 @@ from routes.UserRoutes import user_bp  # Importá el Base desde tu models
 from routes.vehicles_routes import vehicle_bp 
 from routes.vehicle_state_routes import vehicle_state_bp 
 from routes.vehicle_type_routes import vehicle_types_bp
+from utils.ai import call_llm
 
 load_dotenv()
 app = Flask(__name__)
@@ -30,8 +30,9 @@ db.init_app(app)
 # Configurar carpeta de uploads
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+# <<<<<<< HEAD
 # Configurá tu API KEY de Gemini
-genai.configure(api_key=app.config['GEMINI_API_KEY'])
+# genai.configure(api_key=app.config['GEMINI_API_KEY'])
 
 # @app.route('/', methods=['GET', 'POST'])
 # def index():
@@ -78,9 +79,55 @@ genai.configure(api_key=app.config['GEMINI_API_KEY'])
 #                 result = f"Error: {e}"
 
 #     return render_template("index.html", result=result)
-@app.route('/', methods=['GET'])
+# @app.route('/', methods=['GET'])
+# def index():
+#     return render_template("carta.html")
+# =======
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template("carta.html")
+    result = ""
+    if request.method == 'POST':
+        prompt = request.form['prompt']
+        image = request.files['image']
+        ref_image = request.files.get('ref_image')  # Imagen de referencia opcional
+
+        if image:
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], image.filename)
+            image.save(image_path)
+
+            ref_image_path = ''
+            if ref_image and ref_image.filename != "":
+                ref_image_path = os.path.join(app.config['UPLOAD_FOLDER'], ref_image.filename)
+                ref_image.save(ref_image_path)
+
+            llm_data = [
+	            {	#imagen lateral izquierda
+	        	    'image': image_path,
+	        	    'parts': [
+                        { 
+                            'part': 'frente delantero antes', 
+                            'damages': []
+                        }
+                    ]
+                },
+	            {	#imagen lateral derecha
+	        	    'image': ref_image_path,
+	        	    'parts': [
+                        { 
+                            'part': 'frente delantero despues', 
+                            'damages': ['abolladura', 'rayon']
+                        }
+                    ]
+                }
+            ]
+
+            try:
+                result = call_llm(llm_data, 'COMP')
+            except Exception as e:
+                result = f'Error: {e}'
+
+    return render_template('index.html', result=result)
+# >>>>>>> feat/ai-connector
 
 # app.py
 
@@ -88,9 +135,9 @@ if __name__ == '__main__':
     with app.app_context():
         try:
             db.session.execute(text('SELECT 1'))
-            print("✅ Conexión exitosa a la base de datos.")
+            print('✅ Conexión exitosa a la base de datos.')
         except Exception as e:
-            print(f"❌ Error de conexión a la base de datos: {e}")
+            print(f'❌ Error de conexión a la base de datos: {e}')
         Base.metadata.create_all(bind=db.engine)
 
         from models.parts_seed import seed_parts
