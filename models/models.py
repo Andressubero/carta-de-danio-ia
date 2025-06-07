@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, Integer, Boolean, Date, Enum, ForeignKey, Table
+from sqlalchemy import Column, String, Integer, Boolean, Date, Enum, ForeignKey, Table, Text
 from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.types import TypeDecorator, CHAR
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
@@ -116,6 +116,8 @@ class VehicleState(Base):
             "validation_reasons": self.validation_reasons,
             "declared_date": self.declared_date.isoformat() if self.declared_date else None
         }
+    ai_analysis = relationship("VehicleAIAnalysis", uselist=False, back_populates="vehicle_state")
+
     
     
     
@@ -153,3 +155,22 @@ class Damage(Base):
     fixed = Column(Boolean, default=False)
 
     vehicle_part_state = relationship("VehiclePartState", back_populates="damages")
+
+class VehicleAIAnalysis(Base):
+    __tablename__ = 'vehicle_ai_analysis'
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    vehicle_state_id = Column(GUID(), ForeignKey('vehicle_state.id'), nullable=False)
+    is_vehicle_valid = Column(Boolean, nullable=False)
+    vehicle_type = Column(String(50), nullable=True)
+    estimated_brand = Column(String(100), nullable=True)
+    estimated_model = Column(String(100), nullable=True)
+    is_same_unit_as_reference = Column(Boolean, nullable=True)
+    same_unit_confidence = Column(Integer, nullable=True)
+    total_vehicle_damage_percentage = Column(String(100), nullable=True)
+    image_quality = Column(String(50), nullable=True)
+    image_type = Column(String(50), nullable=False)
+    additional_comments = Column(Text, nullable=True)
+    comparison_with_reference = Column(Text, nullable=True)
+    data = Column(Text, nullable=False, default='[]')
+
+    vehicle_state = relationship("VehicleState", back_populates="ai_analysis")
