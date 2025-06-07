@@ -20,6 +20,20 @@ def login_controller():
         return response
     else:
         return jsonify({'message': 'Credenciales inválidas'}), 200
+    
+
+def logout_controller():
+    # Elimina la cookie del token seteando valor vacío y expiración en el pasado
+    response = make_response(jsonify({'message': 'Logout exitoso'}))
+    response.set_cookie(
+        key='token',
+        value='',
+        httponly=True,
+        samesite='Lax',
+        expires=0,
+        secure=False # True si usás HTTPS
+    )
+    return response
 
 def create_user_controller():
     data = request.get_json()
