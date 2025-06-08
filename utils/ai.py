@@ -39,34 +39,61 @@ def get_prompt(action):
     return load_prompt(path)
 
 def call_llm(data, action):
+
     load_dotenv()
     genai.configure(api_key=os.getenv('OPENAI_API_KEY'))
 
     prompt = get_prompt(action)
-    parts = [{'text': prompt +' '+ str(data)}]
-    
-    for index in range(len(data["damages"])):
-        img_bytes = img_to_bytes(data["damages"][index]['image'])
-        mime_type = data["damages"][index]['mime_type']
-        parts.append({"inline_data": {
-            "mime_type": mime_type,
-            "data": img_bytes
-        }})
-        # Imagen de referencia (solo si es comparacion)
-        if action == 'COMP' and 'reference_image' in data["damages"][index]:
-            ref_img_bytes = img_to_bytes(data["damages"][index]['reference_image'])
-            ref_mime_type = data["damages"][index]['reference_mime_type']
-            parts.append({"inline_data": {
-                "mime_type": ref_mime_type,
-                "data": ref_img_bytes
-            }})
 
+    parts = []
+
+    # 1️⃣ Agregamos el prompt + datos en texto
+    parts.append({'text': prompt + ' ' + str(data)})
+
+    # 2️⃣ Recorremos cada imagen
+    for index in range(len(data["damages"])):
+        image_entry = data["damages"][index]
+
+        # Imagen principal
+        img_bytes = img_to_bytes(image_entry['image'])
+        mime_type = image_entry['mime_type']
+
+        parts.append({
+            "inline_data": {
+                "mime_type": mime_type,
+                "data": img_bytes
+            }
+        })
+
+        # Si hay imagen de referencia, la agregamos también
+        if 'reference_image' in image_entry and image_entry['reference_image']:
+            reference_img_bytes = img_to_bytes(image_entry['reference_image'])
+            reference_mime_type = image_entry['reference_mime_type']
+
+            parts.append({
+                "inline_data": {
+                    "mime_type": reference_mime_type,
+                    "data": reference_img_bytes
+                }
+            })
+
+    # Logueamos lo que se va a enviar (opcional)
+    print(">>> Enviando a la IA los siguientes parts:")
+    for i, part in enumerate(parts):
+        if 'text' in part:
+            print(f"Part {i}: Text prompt ({len(part['text'])} chars)")
+        else:
+            print(f"Part {i}: Image with mime_type = {part['inline_data']['mime_type']} ({len(part['inline_data']['data'])} bytes)")
+
+    # 3️⃣ Llamamos a la IA
     model = genai.GenerativeModel(os.getenv('GEMINI_MODEL'))
 
     try:
         response = model.generate_content([
             {'role': 'user', 'parts': parts}
         ])
+
         return response.text
+
     except Exception as e:
         print(f'Error: {e}')
