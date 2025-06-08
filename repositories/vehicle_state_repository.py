@@ -91,3 +91,21 @@ class VehicleStateRepository:
             .order_by(VehicleState.declared_date.asc())
             .all()
         )
+    
+    @staticmethod
+    def get_latest_by_vehicle_id(vehicle_id):
+        return (
+            db.session.query(VehicleState)
+            .filter_by(vehicle_id=vehicle_id)
+            .order_by(VehicleState.declared_date.desc())  # Orden descendente (mayor fecha primero)
+            .first()  # Solo el primero (el más reciente)
+        )
+
+    @staticmethod
+    def get_latest_vehicle_part_state_by_vehicle_part_id(vehicle_part_id):
+        return (
+            db.session.query(VehiclePartState)
+            .filter(VehiclePartState.vehicle_part_id == vehicle_part_id)
+            .order_by(VehiclePartState.creation_date.desc())
+            .first()
+        )

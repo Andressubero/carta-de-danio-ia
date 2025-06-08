@@ -6,7 +6,8 @@ Te llegará junto a este los siguientes datos en un formato como este ejemplo:
 [
   {
     "image": "url de la imagen lateral derecha",
-    "image_type": "ImageTypeEnum.LATERAL_RIGHT", 
+    "reference_image": "url de la imagen lateral derecha de referencia"
+    "image_type": "LATERAL_LEFT", 
     "brand": "marca",
     "model": "modelo", 
     "parts": [
@@ -46,7 +47,7 @@ Devolve el siguiente JSON estructurado:
       "parts": [
         {
           "name": "puerta delantera derecha",
-          "severity": "MID",
+          "severity": "MID || HIGHT || LOW",
           "damages": [
             {
               "type": "abolladura",

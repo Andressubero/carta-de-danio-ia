@@ -1,10 +1,12 @@
 import uuid
-from sqlalchemy import Column, String, Integer, Boolean, Date, Enum, ForeignKey, Table, Text
+from sqlalchemy import Column, String, Integer, Boolean, Date, Enum, ForeignKey, Table, Text, DateTime
 from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.types import TypeDecorator, CHAR
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from datetime import date
+from datetime import date, datetime
 import enum
+
+
 
 Base = declarative_base()
 
@@ -141,6 +143,7 @@ class VehiclePartState(Base):
     vehicle_state_id = Column(GUID(), ForeignKey('vehicle_state.id'))
     vehicle_part_id = Column(GUID(), ForeignKey('vehicle_part.id'))
     image = Column(String(255), nullable=True)
+    creation_date = Column(DateTime, default=datetime.utcnow)
 
     vehicle_state = relationship("VehicleState", back_populates="parts_state")
     vehicle_part = relationship("VehiclePart", back_populates="part_states")

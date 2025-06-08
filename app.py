@@ -30,104 +30,11 @@ db.init_app(app)
 # Configurar carpeta de uploads
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# <<<<<<< HEAD
-# Configurá tu API KEY de Gemini
-# genai.configure(api_key=app.config['GEMINI_API_KEY'])
+from flask import render_template, request, redirect, url_for, flash
 
-# @app.route('/', methods=['GET', 'POST'])
-# def index():
-#     result = ""
-#     if request.method == 'POST':
-#         prompt = request.form['prompt']
-#         image = request.files['image']
-#         ref_image = request.files.get('ref_image')  # Imagen de referencia opcional
-
-#         if image:
-#             image_path = os.path.join(app.config['UPLOAD_FOLDER'], image.filename)
-#             image.save(image_path)
-
-#             with open(image_path, "rb") as img_file:
-#                 img_bytes = img_file.read()
-
-#             parts = [{"text": prompt},
-#                      {"inline_data": {
-#                          "mime_type": "image/jpeg",
-#                          "data": img_bytes
-#                      }}]
-
-#             if ref_image and ref_image.filename != "":
-#                 ref_image_path = os.path.join(app.config['UPLOAD_FOLDER'], ref_image.filename)
-#                 ref_image.save(ref_image_path)
-#                 with open(ref_image_path, "rb") as ref_img_file:
-#                     ref_img_bytes = ref_img_file.read()
-
-#                 # Añadir mensaje contextual
-#                 parts.insert(0, {"text": "Compará el estado actual del vehículo con la imagen de referencia anterior, identificando solo los daños nuevos si los hubiera."})
-#                 parts.append({"inline_data": {
-#                     "mime_type": "image/jpeg",
-#                     "data": ref_img_bytes
-#                 }})
-
-#             model = genai.GenerativeModel("gemini-1.5-flash")
-
-#             try:
-#                 response = model.generate_content([
-#                     {"role": "user", "parts": parts}
-#                 ])
-#                 result = response.text
-#             except Exception as e:
-#                 result = f"Error: {e}"
-
-#     return render_template("index.html", result=result)
-# @app.route('/', methods=['GET'])
-# def index():
-#     return render_template("carta.html")
-# =======
-@app.route('/', methods=['GET', 'POST'])
+@app.route("/", methods=["GET"])
 def index():
-    result = ""
-    if request.method == 'POST':
-        prompt = request.form['prompt']
-        image = request.files['image']
-        ref_image = request.files.get('ref_image')  # Imagen de referencia opcional
-
-        if image:
-            image_path = os.path.join(app.config['UPLOAD_FOLDER'], image.filename)
-            image.save(image_path)
-
-            ref_image_path = ''
-            if ref_image and ref_image.filename != "":
-                ref_image_path = os.path.join(app.config['UPLOAD_FOLDER'], ref_image.filename)
-                ref_image.save(ref_image_path)
-
-            llm_data = [
-	            {	#imagen lateral izquierda
-	        	    'image': image_path,
-	        	    'parts': [
-                        { 
-                            'part': 'frente delantero antes', 
-                            'damages': []
-                        }
-                    ]
-                },
-	            {	#imagen lateral derecha
-	        	    'image': ref_image_path,
-	        	    'parts': [
-                        { 
-                            'part': 'frente delantero despues', 
-                            'damages': ['abolladura', 'rayon']
-                        }
-                    ]
-                }
-            ]
-
-            try:
-                result = call_llm(llm_data, 'COMP')
-            except Exception as e:
-                result = f'Error: {e}'
-
-    return render_template('index.html', result=result)
-# >>>>>>> feat/ai-connector
+    return render_template("carta.html")
 
 # app.py
 

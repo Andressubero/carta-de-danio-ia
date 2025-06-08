@@ -4,11 +4,8 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 
 def img_to_bytes(path):
-    img_bytes = bytes
-    abs_path = os.path.join(os.path.dirname(__file__), '../', path)
-    with open(abs_path, 'rb') as img_file:
-        img_bytes = img_file.read()
-    return img_bytes
+    with open(path, 'rb') as img_file:
+        return img_file.read()
 
 def load_paths():
     try:
@@ -24,7 +21,7 @@ def load_prompt(path):
     try:
         prompt = '' 
         abs_path = os.path.join(os.path.dirname(__file__), '../prompts/', path)
-        with open(abs_path) as file:
+        with open(abs_path, encoding='utf-8') as file:
             prompt = file.read()
         return prompt
     except Exception as e:
@@ -48,13 +45,21 @@ def call_llm(data, action):
     prompt = get_prompt(action)
     parts = [{'text': prompt +' '+ str(data)}]
     
-    for index in range(len(data)):
-        img_bytes = img_to_bytes(data[index]['image'])
-
+    for index in range(len(data["damages"])):
+        img_bytes = img_to_bytes(data["damages"][index]['image'])
+        mime_type = data["damages"][index]['mime_type']
         parts.append({"inline_data": {
-            "mime_type": "image/jpeg",
+            "mime_type": mime_type,
             "data": img_bytes
         }})
+        # Imagen de referencia (solo si es comparacion)
+        if action == 'COMP' and 'reference_image' in data["damages"][index]:
+            ref_img_bytes = img_to_bytes(data["damages"][index]['reference_image'])
+            ref_mime_type = data["damages"][index]['reference_mime_type']
+            parts.append({"inline_data": {
+                "mime_type": ref_mime_type,
+                "data": ref_img_bytes
+            }})
 
     model = genai.GenerativeModel(os.getenv('GEMINI_MODEL'))
 
