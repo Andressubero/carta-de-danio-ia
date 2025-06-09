@@ -1,5 +1,6 @@
 import os
 import json
+import regex
 import google.generativeai as genai
 from dotenv import load_dotenv
 
@@ -41,6 +42,11 @@ def get_prompt(action):
 
     return load_prompt(path)
 
+def extract_json(txt):
+    pattern = regex.compile(r'\{(?:[^{}]|(?R))*\}')
+    output = pattern.findall(txt)
+    return json.loads(output[0])
+
 def call_llm(data, action):
     load_dotenv()
     genai.configure(api_key=os.getenv('OPENAI_API_KEY'))
@@ -62,6 +68,6 @@ def call_llm(data, action):
         response = model.generate_content([
             {'role': 'user', 'parts': parts}
         ])
-        return response.text
+        return extract_json(response.text)
     except Exception as e:
         print(f'Error: {e}')
