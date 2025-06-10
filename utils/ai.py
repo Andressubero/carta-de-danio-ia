@@ -51,8 +51,8 @@ def call_llm(data, action):
     parts.append({'text': prompt + ' ' + str(data)})
 
     # 2️⃣ Recorremos cada imagen
-    for index in range(len(data["damages"])):
-        image_entry = data["damages"][index]
+    for index in range(len(data["states"])):
+        image_entry = data["states"][index]
 
         # Imagen principal
         img_bytes = img_to_bytes(image_entry['image'])

@@ -217,7 +217,7 @@ image_top=None
     grouped_structure = list(image_groups.values())
 
     analysis_object = {
-        "damages": grouped_structure,
+        "states": grouped_structure,
         "brand": vehicle.brand,
         "model": vehicle.model
     }
@@ -227,41 +227,14 @@ image_top=None
     print(f"Estructura a enviar a la ia { analysis_object}")
 
 
-    if previous_state:
-        result = call_llm(analysis_object, 'COMP')
-        cleaned = result.strip()
-        # Quitar los delimitadores de markdown ```json y ```
-        if cleaned.startswith("```json"):
-            cleaned = cleaned[len("```json"):]
+    # Llamar a la IA con el prompt correspondiente
+    result = call_llm(analysis_object, 'COMP' if previous_state else 'ALTA')
+    parsed = clean_and_parse_llm_response(result)
 
-        if cleaned.endswith("```"):
-            cleaned = cleaned[:-3]
+    state_to_use = VehicleStateRepository.save(vehicle_id, states, validation_reasons, date)
 
-        cleaned = cleaned.strip()
+    # Guardar AIReport siempre
+    ai_report = AIReportRepository.save(parsed, state_to_use.id)
 
-        # Ahora sí parsear
-        parsed = json.loads(cleaned)
-
-        print(parsed)
-    else:
-        result = call_llm(analysis_object, 'ALTA')
-        cleaned = result.strip()
-
-        # Quitar los delimitadores de markdown ```json y ```
-        if cleaned.startswith("```json"):
-            cleaned = cleaned[len("```json"):]
-
-        if cleaned.endswith("```"):
-            cleaned = cleaned[:-3]
-
-        cleaned = cleaned.strip()
-
-        # Ahora sí parsear
-        parsed = json.loads(cleaned)
-
-        print(parsed)
-
-        newState = VehicleStateRepository.save(vehicle_id, states, validation_reasons, date)
-        ai_report = AIReportRepository.save(parsed, newState.id)
-        
-    return { state: newState, ai_report: ai_report }
+    # Retornar ambos
+    return { "state": state_to_use, "ai_report": ai_report }

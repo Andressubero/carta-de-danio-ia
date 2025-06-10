@@ -52,7 +52,7 @@ class AIReportRepository:
             raise Exception(f"Error saving AIReport: {str(e)}")
 
         
-
+    @staticmethod
     def get_by_id(id):
         if not id:
             return None
