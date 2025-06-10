@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from repositories.vehicle_state_repository import VehicleStateRepository
+from repositories.ai_report_repository import AIReportRepository
 from services.vehicle_service import get_vehicle_with_parts
 from extensions import db
 from utils.date import get_image_capture_date
@@ -14,6 +15,15 @@ import os
 import re
 from PIL import Image
 
+def clean_and_parse_llm_response(llm_response):
+    cleaned = llm_response.strip()
+    if cleaned.startswith("```json"):
+        cleaned = cleaned[len("```json"):]
+    if cleaned.endswith("```"):
+        cleaned = cleaned[:-3]
+    cleaned = cleaned.strip()
+    return json.loads(cleaned)
+    
 def get_vehicle_part_by_part_id(vehicle, part_id):
     """
     Dado un Vehicle y un id de Part, devuelve el VehiclePart correspondiente
@@ -251,4 +261,7 @@ image_top=None
 
         print(parsed)
 
-    return VehicleStateRepository.save(vehicle_id, states, validation_reasons, date)
+        newState = VehicleStateRepository.save(vehicle_id, states, validation_reasons, date)
+        ai_report = AIReportRepository.save(parsed, newState.id)
+        
+    return { state: newState, ai_report: ai_report }
