@@ -13,6 +13,7 @@ def login_controller():
         response.set_cookie(
             key='token',
             value=token,
+            max_age=3600,         # 1 hora
             httponly=True,        # protege contra JS (XSS) 
             samesite='Lax',       # evita CSRF básicos
             secure=False          # ⚠️ ponelo en True si usás HTTPS. Si secure=True, la cookie solo se enviará bajo HTTPS
