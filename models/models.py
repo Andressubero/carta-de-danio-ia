@@ -99,6 +99,24 @@ class Vehicle(Base):
     type = relationship("VehicleType")
     states = relationship("VehicleState", back_populates="vehicle")
     parts = relationship("VehiclePart", back_populates="vehicle", cascade="all, delete-orphan")
+    def to_dict(self):
+        return {
+            "id": str(self.id),
+            "user_id": str(self.user_id),
+            "vehicle_type_id": str(self.vehicle_type_id),
+            "model": self.model,
+            "brand": self.brand,
+            "year": self.year,
+            "plate": self.plate,
+            "type": self.type.name if self.type else None,
+            "parts": [
+                        {
+                            "id": str(part.id),
+                            "name": part.name
+                        }
+                        for part in self.parts
+                    ]
+        }
 
 class VehicleState(Base):
     __tablename__ = 'vehicle_state'
