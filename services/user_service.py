@@ -14,6 +14,8 @@ def login_user(username, password):
     if user and check_password_hash(user.password, password):
         payload = {
             'user_id': str(user.id),
+            "username": user.username,
+            'role_id': user.role_id if user.role else 'user',
             'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)
         }
         token = jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')
@@ -62,3 +64,7 @@ def get_all_users_service():
         return {'users': users_data}, 200
     except Exception as e:
         return {'error': str(e)}, 500
+    
+
+def get_user_by_id(user_id):
+    return db.session.query(User).get(user_id)

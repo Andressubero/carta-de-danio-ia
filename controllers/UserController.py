@@ -1,10 +1,11 @@
-from flask import request, jsonify, make_response
-from services.user_service import login_user, create_user_service, get_all_users_service
+from flask import request, jsonify, make_response, g
+from services.user_service import login_user, create_user_service, get_all_users_service, get_user_by_id
 
 def login_controller():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
+
 
     token = login_user(username, password)
 
@@ -48,3 +49,15 @@ def create_user_controller():
 def get_all_users_controller():
     result, status_code = get_all_users_service()
     return result, status_code
+
+def get_me():
+    user = get_user_by_id(g.user_id)
+
+    if not user:
+        return jsonify({'message': 'Usuario no encontrado'}), 404
+
+    return jsonify({
+        'id': str(user.id),
+        'username': user.username,
+        'role_id': str(user.role_id) if user.role_id else None
+    }), 200

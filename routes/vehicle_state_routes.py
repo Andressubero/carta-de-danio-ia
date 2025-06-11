@@ -14,9 +14,7 @@ def protected_create_vehicle_state(*args, **kwargs):
 
 @vehicle_state_bp.route('/getall', methods=['GET'])
 @token_required
-#@admin_required
 def protected_get_all_vehicle_state(*args, **kwargs):
     return get_all_vehicle_state(*args, **kwargs)
 
-#crear una getallbyuser 
 
