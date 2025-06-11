@@ -19,6 +19,7 @@ def token_required(f):
             return jsonify({'message': 'Token inválido'}), 401
         
         g.user_id = payload['user_id']
+        g.role_id = payload['role_id']
 
         return f(*args, **kwargs)
     return decorated

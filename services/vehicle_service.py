@@ -21,7 +21,15 @@ def create(user_id, vehicle_type_id, model, brand, year, plate):
 
     try:
         VehicleRepository.save(vehicle)
-        return {'message': 'Vehículo creado con éxito', 'success': True}, 201
+        return {'message': 'Vehículo creado con éxito', 'success': True,
+                    "vehicle": {
+                "id": vehicle.id,
+                "brand": vehicle.brand,
+                "model": vehicle.model,
+                "year": vehicle.year,
+                "plate": vehicle.plate, 
+                "vehicle_type_id": vehicle.vehicle_type_id
+            }}, 201
     except Exception as e:
         return {'message': f'Error al crear vehículo: {str(e)}'}, 500
 

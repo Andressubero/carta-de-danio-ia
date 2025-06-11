@@ -11,6 +11,7 @@ from routes.UserRoutes import user_bp  # Importá el Base desde tu models
 from routes.vehicles_routes import vehicle_bp 
 from routes.vehicle_state_routes import vehicle_state_bp 
 from routes.vehicle_type_routes import vehicle_types_bp
+from routes.ai_report_routes import report_bp
 from utils.ai import call_llm
 
 load_dotenv()
@@ -21,6 +22,7 @@ app.register_blueprint(user_bp)
 app.register_blueprint(vehicle_bp)
 app.register_blueprint(vehicle_types_bp)
 app.register_blueprint(vehicle_state_bp)
+app.register_blueprint(report_bp)
 #CORS(app)
 
 
