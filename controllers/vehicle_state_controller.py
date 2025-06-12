@@ -14,6 +14,13 @@ def create_vehicle_state():
     image_front = request.files.get('front')
     image_back = request.files.get('back')
     image_top = request.files.get('top')
+    print("Received images:", {
+        "lateral_right": image_lateral_right,
+        "lateral_left": image_lateral_left,
+        "front": image_front,
+        "back": image_back,
+        "top": image_top
+    })
 
     try:
         vehicle_state = create(

@@ -4,7 +4,7 @@ from repositories.ai_report_repository import AIReportRepository
 from services.vehicle_service import get_vehicle_with_parts
 from extensions import db
 from utils.date import get_image_capture_date
-from models.models import ImageTypeEnum, Part
+from models.models import ImageTypeEnum, Part, VehiclePart
 from datetime import datetime, timedelta
 from constants.errors import errors
 from flask import current_app as app
@@ -132,13 +132,17 @@ image_top=None
         if not part_id or not damages:
             raise ValueError(f"{errors['STATES_DATOS_INCORRECTOS']['codigo']}")
         
-        part = db.session.query(Part).filter_by(id=UUID(part_id)).first()
-        print(f"Parte encontrada: {part}")
+        vehicle_part = db.session.query(VehiclePart).filter_by(id=part_id).first()
+        if not vehicle_part:
+            raise ValueError(f"{errors['PARTE_NO_ENCONTRADA']['codigo']}")
+        part = db.session.query(Part).filter_by(id=vehicle_part.part_id).first()
         if not part:
             raise ValueError(f"{errors['PARTE_NO_ENCONTRADA']['codigo']}")
         
         image_type_required = part.image_type
         image_file = available_images.get(image_type_required)
+
+        
 
         if not image_file:
             raise ValueError(
