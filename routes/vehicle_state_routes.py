@@ -10,7 +10,7 @@ vehicle_state_bp = Blueprint('states', __name__, url_prefix='/vehicle-state')
 def create_vehicle_state_route(): return create_vehicle_state()
 
 
-vehicle_state_bp.route('/getall', methods=['GET'])
+@vehicle_state_bp.route('/get-all', methods=['GET'])
 @token_required
 def get_all_vehicle_state_route(): return get_all_vehicle_state()
 
