@@ -14,6 +14,7 @@ import uuid
 import os
 import re
 from PIL import Image
+from uuid import UUID
 
 def clean_and_parse_llm_response(llm_response):
     cleaned = llm_response.strip()
@@ -123,6 +124,7 @@ image_top=None
 
     for state in states:
         part_id = state.get('part_id')
+        print(f"Procesando parte con ID: {part_id}")
         damages = state.get('damages')
         if not isinstance(damages, list) or not damages:
             raise ValueError(f"{errors['STATES_DATOS_INCORRECTOS']['codigo']}")
@@ -139,6 +141,8 @@ image_top=None
         
         image_type_required = part.image_type
         image_file = available_images.get(image_type_required)
+
+        
 
         if not image_file:
             raise ValueError(
