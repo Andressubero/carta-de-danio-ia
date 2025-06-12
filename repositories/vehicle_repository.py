@@ -36,16 +36,17 @@ class VehicleRepository:
             db.session.rollback()
             raise Exception(f"{errors['ERROR_GUARDAR_VEHICULO']['codigo']}: {str(e)}")
 
-
+    @staticmethod
     def get_by_id(id):
-        vehicle_id = Vehicle.id
-        if not vehicle_id:
+        if not id:
             return None
-        return db.session.query(Vehicle).filter_by(id=vehicle_id).first()
+        return db.session.query(Vehicle).filter_by(id=id).first()
     
+    @staticmethod
     def get_all_by_user(id):     
         return db.session.query(Vehicle).filter_by(user_id=id).all()
     
+    @staticmethod
     def get_vehicle_with_parts(vehicle_id):
         return db.session.query(Vehicle)\
             .options(joinedload(Vehicle.parts))\

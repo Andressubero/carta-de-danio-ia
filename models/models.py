@@ -1,10 +1,12 @@
 import uuid
-from sqlalchemy import Column, String, Integer, Boolean, Date, Enum, ForeignKey, Table
+from sqlalchemy import Column, String, Integer, Boolean, Date, Enum, ForeignKey, Table, Text, DateTime
 from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.types import TypeDecorator, CHAR
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from datetime import date
+from datetime import date, datetime
 import enum
+
+
 
 Base = declarative_base()
 
@@ -36,6 +38,7 @@ class DamageTypeEnum(str, enum.Enum):
     RALLON = "RALLON"
     OTRO = "OTRO"
     SIN_DANO = "SIN_DANO"
+    ROTURA = "ROTURA"
 
 class ImageTypeEnum(str, enum.Enum):
     LATERAL_RIGHT = "image_lateral_right"
@@ -96,6 +99,24 @@ class Vehicle(Base):
     type = relationship("VehicleType")
     states = relationship("VehicleState", back_populates="vehicle")
     parts = relationship("VehiclePart", back_populates="vehicle", cascade="all, delete-orphan")
+    def to_dict(self):
+        return {
+            "id": str(self.id),
+            "user_id": str(self.user_id),
+            "vehicle_type_id": str(self.vehicle_type_id),
+            "model": self.model,
+            "brand": self.brand,
+            "year": self.year,
+            "plate": self.plate,
+            "type": self.type.name if self.type else None,
+            "parts": [
+                        {
+                            "id": str(part.id),
+                            "name": part.name
+                        }
+                        for part in self.parts
+                    ]
+        }
 
 class VehicleState(Base):
     __tablename__ = 'vehicle_state'
@@ -107,7 +128,7 @@ class VehicleState(Base):
 
     vehicle = relationship("Vehicle", back_populates="states")
     parts_state = relationship("VehiclePartState", back_populates="vehicle_state")
-    
+    ai_reports = relationship("AIReport", back_populates="vehicle_state", cascade="all, delete-orphan")
     def to_dict(self):
         return {
             "id": str(self.id),
@@ -116,6 +137,8 @@ class VehicleState(Base):
             "validation_reasons": self.validation_reasons,
             "declared_date": self.declared_date.isoformat() if self.declared_date else None
         }
+
+
     
     
     
@@ -139,6 +162,7 @@ class VehiclePartState(Base):
     vehicle_state_id = Column(GUID(), ForeignKey('vehicle_state.id'))
     vehicle_part_id = Column(GUID(), ForeignKey('vehicle_part.id'))
     image = Column(String(255), nullable=True)
+    creation_date = Column(DateTime, default=datetime.utcnow)
 
     vehicle_state = relationship("VehicleState", back_populates="parts_state")
     vehicle_part = relationship("VehiclePart", back_populates="part_states")
@@ -153,3 +177,77 @@ class Damage(Base):
     fixed = Column(Boolean, default=False)
 
     vehicle_part_state = relationship("VehiclePartState", back_populates="damages")
+
+class AIReport(Base):
+    __tablename__ = 'ai_report'
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+
+    vehicle_state_id = Column(GUID(), ForeignKey('vehicle_state.id'), nullable=False)
+    vehicle_state = relationship("VehicleState", back_populates="ai_reports")
+
+    is_vehicle_valid = Column(Boolean, nullable=False)
+    image_type = Column(String(100))
+    vehicle_type = Column(String(100))
+    estimated_brand = Column(String(255))
+    estimated_model = Column(String(255))
+    image_quality = Column(String(50))
+    is_same_unit_as_reference = Column(Boolean)
+    same_unit_confidence = Column(Integer)  # 0 to 100
+    total_vehicle_damage_percentage = Column(String(10))
+    additional_comments = Column(Text)
+    comparison_with_reference = Column(Text)
+    validation_reasons = Column(Text)
+
+    # Relación a daños por parte
+    part_damages = relationship(
+        "AIReportPartDamage",
+        back_populates="ai_report",
+        cascade="all, delete-orphan"
+    )
+
+    def to_dict(self):
+        return {
+            "id": str(self.id),
+            "vehicle_state_id": str(self.vehicle_state_id),
+            "is_vehicle_valid": self.is_vehicle_valid,
+            "image_type": self.image_type,
+            "vehicle_type": self.vehicle_type,
+            "estimated_brand": self.estimated_brand,
+            "estimated_model": self.estimated_model,
+            "image_quality": self.image_quality,
+            "is_same_unit_as_reference": self.is_same_unit_as_reference,
+            "same_unit_confidence": self.same_unit_confidence,
+            "total_vehicle_damage_percentage": self.total_vehicle_damage_percentage,
+            "additional_comments": self.additional_comments,
+            "comparison_with_reference": self.comparison_with_reference,
+            "validation_reasons": self.validation_reasons,
+            "part_damages": [damage.to_dict() for damage in self.part_damages]
+        }
+
+
+class AIReportPartDamage(Base):
+    __tablename__ = 'ai_report_part_damage'
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    ai_report_id = Column(GUID(), ForeignKey('ai_report.id'), nullable=False)
+    ai_report = relationship("AIReport", back_populates="part_damages")
+
+    part_name = Column(String(255))
+    severity = Column(String(50))  # LOW, MID, HIGH
+    damage_type = Column(String(100))
+    damage_description = Column(Text)
+    confidence_percentage = Column(Integer)
+    present_in_reference = Column(Boolean, nullable=True)  # en AIReport sin referencia puede quedar en null
+
+    def to_dict(self):
+        return {
+            "id": str(self.id),
+            "ai_report_id": str(self.ai_report_id),
+            "part_name": self.part_name,
+            "severity": self.severity,
+            "damage_type": self.damage_type,
+            "damage_description": self.damage_description,
+            "confidence_percentage": self.confidence_percentage,
+            "present_in_reference": self.present_in_reference
+        }

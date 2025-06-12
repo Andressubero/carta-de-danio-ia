@@ -1,15 +1,39 @@
 from flask import request, jsonify
 from repositories.vehicle_state_repository import VehicleStateRepository
+from repositories.ai_report_repository import AIReportRepository
 from services.vehicle_service import get_vehicle_with_parts
 from extensions import db
 from utils.date import get_image_capture_date
-from models.models import ImageTypeEnum, Part
+from models.models import ImageTypeEnum, Part, VehiclePart
 from datetime import datetime, timedelta
 from constants.errors import errors
 from flask import current_app as app
+from utils.ai import call_llm
+import json
 import uuid
 import os
 import re
+from PIL import Image
+from uuid import UUID
+
+def clean_and_parse_llm_response(llm_response):
+    cleaned = llm_response.strip()
+    if cleaned.startswith("```json"):
+        cleaned = cleaned[len("```json"):]
+    if cleaned.endswith("```"):
+        cleaned = cleaned[:-3]
+    cleaned = cleaned.strip()
+    return json.loads(cleaned)
+    
+def get_vehicle_part_by_part_id(vehicle, part_id):
+    """
+    Dado un Vehicle y un id de Part, devuelve el VehiclePart correspondiente
+    o None si no existe.
+    """
+    return next(
+        (vp for vp in vehicle.parts if str(vp.part_id) == str(part_id)),
+        None
+    )
 
 def simple_secure_filename(filename):
     """
@@ -37,6 +61,19 @@ def get_all():
     except Exception as e:
         raise RuntimeError(f"Error al obtener los estados de vehículos: {str(e)}")
 
+def get_image_mime_type(path):
+    img = Image.open(path)
+    format = img.format
+    if format == 'JPEG':
+        return 'image/jpeg'
+    elif format == 'PNG':
+        return 'image/png'
+    elif format == 'WEBP':
+        return 'image/webp'
+    else:
+        raise ValueError(f"Formato de imagen no soportado: {format}")
+
+
 def create(
 vehicle_id,
 states,
@@ -50,7 +87,7 @@ image_top=None
     if not vehicle_id or not date:
         raise ValueError(f"{errors['VEHICULO_NO_ENCONTRADO']['codigo']}")
     
-    if not isinstance(states, list) or not states:
+    if not isinstance(states, list):
         raise ValueError(f"{errors['DATOS_INSUFICIENTES']['codigo']}")
 
     available_images = {
@@ -70,14 +107,14 @@ image_top=None
     if vehicle is None:
         raise ValueError(f"{errors['ERROR-16']['mensaje']}")
     
-    previous_states = VehicleStateRepository.get_all_by_vehicle_id(vehicle_id)
-    if not previous_states:
-        # states debe coincidir con el length porque es el primer estado
-        #is_valid, msg = validate_parts(vehicle.parts, states)
-        #if not is_valid:
-        #    raise ValueError(f"{errors['DATOS_INSUFICIENTES']['codigo']}: {msg}")
-        if not all([image_lateral_right, image_lateral_left, image_front, image_back, image_top]):
-            raise ValueError(f"{errors['DATOS_INSUFICIENTES']['codigo']}: El primer state requiere todas las imágenes") 
+    previous_state = VehicleStateRepository.get_latest_by_vehicle_id(vehicle_id)
+    # if not previous_state:
+    #     # states debe coincidir con el length porque es el primer estado
+    #     #is_valid, msg = validate_parts(vehicle.parts, states)
+    #     #if not is_valid:
+    #     #    raise ValueError(f"{errors['DATOS_INSUFICIENTES']['codigo']}: {msg}")
+    #     if not all([image_lateral_right, image_lateral_left, image_front, image_back, image_top]):
+    #         raise ValueError(f"{errors['DATOS_INSUFICIENTES']['codigo']}: El primer state requiere todas las imágenes") 
 
     validation_reasons = []
     saved_images = set()
@@ -87,6 +124,7 @@ image_top=None
 
     for state in states:
         part_id = state.get('part_id')
+        print(f"Procesando parte con ID: {part_id}")
         damages = state.get('damages')
         if not isinstance(damages, list) or not damages:
             raise ValueError(f"{errors['STATES_DATOS_INCORRECTOS']['codigo']}")
@@ -94,12 +132,17 @@ image_top=None
         if not part_id or not damages:
             raise ValueError(f"{errors['STATES_DATOS_INCORRECTOS']['codigo']}")
         
-        part = db.session.query(Part).filter_by(id=part_id).first()
+        vehicle_part = db.session.query(VehiclePart).filter_by(id=part_id).first()
+        if not vehicle_part:
+            raise ValueError(f"{errors['PARTE_NO_ENCONTRADA']['codigo']}")
+        part = db.session.query(Part).filter_by(id=vehicle_part.part_id).first()
         if not part:
             raise ValueError(f"{errors['PARTE_NO_ENCONTRADA']['codigo']}")
         
         image_type_required = part.image_type
         image_file = available_images.get(image_type_required)
+
+        
 
         if not image_file:
             raise ValueError(
@@ -108,8 +151,60 @@ image_top=None
 
         capture_date = None
         
+        if image_type_required not in saved_images:
+            os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], vehicle_id), exist_ok=True)
+            ext = os.path.splitext(image_file.filename)[1]
+            if not ext or ext == '.':
+                ext = '.jpg'
+            unique_id = str(uuid.uuid4())
+            safe_name = simple_secure_filename(f"{image_type_required}-{unique_id}{ext}")
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], vehicle_id, safe_name)
+            if hasattr(image_file, 'save') and callable(image_file.save):
+                image_file.save(image_path)
+            elif isinstance(image_file, bytes):
+                with open(image_path, 'wb') as f:
+                    f.write(image_file)
+            else:
+                raise RuntimeError(...)
+
+            saved_images.add(image_type_required)
+
+            reference_image_file = None
+        
+            if previous_state and f'reference_{image_type_required}' not in image_paths:
+                finded_vehicle_part = get_vehicle_part_by_part_id(vehicle, part.id)
+                if not finded_vehicle_part:
+                    raise ValueError(f"{errors['PARTE_NO_ENCONTRADA']['codigo']}:{part.name}")
+                last_vehicle_part_state = VehicleStateRepository.get_latest_vehicle_part_state_by_vehicle_part_id(finded_vehicle_part.id)
+                if not last_vehicle_part_state:
+                    raise ValueError(f"{errors['FALTA_REFERENCIA']['codigo']}:{part.name}")
+
+                reference_image_file = last_vehicle_part_state.image
+                image_paths[f'reference_{image_type_required}'] = reference_image_file
+
+            image_paths[image_type_required] = image_path
+            mime_type = get_image_mime_type(image_path)
+            # Crear entrada en el diccionario si no existe
+            image_groups[image_type_required] = {
+                "image": image_path,
+                "mime_type": mime_type,
+                "image_type": image_type_required.value,
+                "parts": []
+            }
+            if previous_state and f'reference_{image_type_required}' in image_paths:
+                mime_type = get_image_mime_type(image_paths[f'reference_{image_type_required}'])
+                image_groups[image_type_required]["reference_image"] = image_paths[f'reference_{image_type_required}']
+                image_groups[image_type_required]["reference_mime_type"] = mime_type
+
+        state["image_path"] = image_paths.get(image_type_required)
+        # Agregar parte y daño a la entrada correspondiente
+        image_groups[image_type_required]["parts"].append({
+            "name": part.name,
+            "damage": damages
+        })
         try:
             capture_date = get_image_capture_date(image_file)
+            image_file.seek(0)
             if capture_date.date() < reference_date.date():
                 validation_reasons.append({
                     "reason": f"{errors['FECHA_TOMADA_ANTES']['codigo']}:{image_type_required}"
@@ -123,43 +218,30 @@ image_top=None
             validation_reasons.append({"reason": f"{errors['FECHA_NO_ENCONTRADA']['codigo']}:{image_type_required}"})
         except RuntimeError as e:
             validation_reasons.append({"reason": f"{errors['ERROR_EXIF']['codigo']}:{image_type_required}"})
-        # Guardar imagen solo si no fue guardada ya
-        if image_type_required not in saved_images:
-            os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], vehicle_id), exist_ok=True)
-            ext = os.path.splitext(image_file.filename)[1]
-            if not ext or ext == '.':
-                ext = '.jpg'
-            unique_id = str(uuid.uuid4())
-            safe_name = simple_secure_filename(f"{image_type_required}-{unique_id}{ext}")
-            image_path = os.path.join(app.config['UPLOAD_FOLDER'], vehicle_id, safe_name)
-            try:
-                image_file.save(image_path)
-            except Exception as e:
-                raise RuntimeError(f"{errors['ERROR_GUARDANDO_LA_IMAGEN']['mensaje']}")
-            saved_images.add(image_type_required)
-            image_paths[image_type_required] = image_path
-            # Leer la imagen en bytes
-            with open(image_path, "rb") as img_file:
-                img_bytes = img_file.read()
-
-            # Crear entrada en el diccionario si no existe
-            image_groups[image_type_required] = {
-                "img": img_bytes,
-                "image_type": image_type_required,
-                "parts": []
-            }
-        state["image_path"] = image_paths.get(image_type_required)
-        # Agregar parte y daño a la entrada correspondiente
-        image_groups[image_type_required]["parts"].append({
-            "name": part.name,
-            "damage": damages
-        })
+        
 
     # Convertir a lista final
     grouped_structure = list(image_groups.values())
 
+    analysis_object = {
+        "states": grouped_structure,
+        "brand": vehicle.brand,
+        "model": vehicle.model
+    }
+
     # acá se envia a al servicio de la ia
 
-    print(f"Estructura a enviar a la ia { grouped_structure}")
+    print(f"Estructura a enviar a la ia { analysis_object}")
 
-    return VehicleStateRepository.save(vehicle_id, states, validation_reasons, date)
+
+    # Llamar a la IA con el prompt correspondiente
+    result = call_llm(analysis_object, 'COMP' if previous_state else 'ALTA')
+    parsed = clean_and_parse_llm_response(result)
+
+    state_to_use = VehicleStateRepository.save(vehicle_id, states, validation_reasons, date)
+
+    # Guardar AIReport siempre
+    ai_report = AIReportRepository.save(parsed, state_to_use.id)
+
+    # Retornar ambos
+    return { "state": state_to_use, "ai_report": ai_report }
