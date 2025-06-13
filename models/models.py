@@ -74,6 +74,13 @@ class User(Base):
 
     role = relationship("Role")
     vehicles = relationship("Vehicle", back_populates="owner")
+    def to_dict(self):
+        return {
+            "id": str(self.id),
+            "username": self.username,
+            "email": self.email,
+            "role": self.role.name if self.role else None
+        }
 
 class VehicleType(Base):
     __tablename__ = 'vehicle_type'

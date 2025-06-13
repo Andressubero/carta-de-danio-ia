@@ -52,12 +52,7 @@ def get_all_users_controller():
 
 def get_me():
     user = get_user_by_id(g.user_id)
-
     if not user:
         return jsonify({'message': 'Usuario no encontrado'}), 404
 
-    return jsonify({
-        'id': str(user.id),
-        'username': user.username,
-        'role_id': str(user.role_id) if user.role_id else None
-    }), 200
+    return jsonify(user.to_dict()), 200
