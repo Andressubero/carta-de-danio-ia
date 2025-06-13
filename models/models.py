@@ -39,6 +39,11 @@ class DamageTypeEnum(str, enum.Enum):
     OTRO = "OTRO"
     SIN_DANO = "SIN_DANO"
     ROTURA = "ROTURA"
+    
+class ValidationStateEnum(str, enum.Enum):
+    PENDING = "PENDIENTE"
+    APPROVED = "APROBADA"
+    DENIED = "DENEGADA"
 
 class ImageTypeEnum(str, enum.Enum):
     LATERAL_RIGHT = "image_lateral_right"
@@ -125,7 +130,7 @@ class VehicleState(Base):
     creation_date = Column(Date, default=date.today)
     validation_reasons = Column(String(255), nullable=True)
     declared_date = Column(Date, default=date.today)
-
+    validation_state = Column(Enum(ValidationStateEnum), default = ValidationStateEnum.PENDING)
     vehicle = relationship("Vehicle", back_populates="states")
     parts_state = relationship("VehiclePartState", back_populates="vehicle_state")
     ai_reports = relationship("AIReport", back_populates="vehicle_state", cascade="all, delete-orphan")
@@ -133,9 +138,13 @@ class VehicleState(Base):
         return {
             "id": str(self.id),
             "vehicle_id": str(self.vehicle_id),
+            "vehicle_brand": self.vehicle.brand if self.vehicle else None,
+            "vehicle_model": self.vehicle.model if self.vehicle else None,
             "creation_date": self.creation_date.isoformat(),
             "validation_reasons": self.validation_reasons,
-            "declared_date": self.declared_date.isoformat() if self.declared_date else None
+            "declared_date": self.declared_date.isoformat() if self.declared_date else None,
+            "validation_state": self.validation_state.value,
+            "parts_state": [part.to_dict() for part in self.parts_state]
         }
 
 
@@ -167,6 +176,15 @@ class VehiclePartState(Base):
     vehicle_state = relationship("VehicleState", back_populates="parts_state")
     vehicle_part = relationship("VehiclePart", back_populates="part_states")
     damages = relationship("Damage", back_populates="vehicle_part_state")
+    def to_dict(self):
+        return {
+            "id": str(self.id),
+            "vehicle_part_id": str(self.vehicle_part_id),
+            "vehicle_part_name": self.vehicle_part.name if self.vehicle_part else None,
+            "image": self.image,
+            "creation_date": self.creation_date.isoformat(),
+            "damages": [damage.to_dict() for damage in self.damages]
+        }
 
 class Damage(Base):
     __tablename__ = 'damage'
@@ -177,6 +195,13 @@ class Damage(Base):
     fixed = Column(Boolean, default=False)
 
     vehicle_part_state = relationship("VehiclePartState", back_populates="damages")
+    def to_dict(self):
+        return {
+            "id": str(self.id),
+            "damage_type": self.damage_type.value,
+            "description": self.description,
+            "fixed": self.fixed
+        }
 
 class AIReport(Base):
     __tablename__ = 'ai_report'

@@ -28,12 +28,13 @@ class VehicleStateRepository:
             vehicle_parts = db.session.query(VehiclePart).filter_by(vehicle_id=vehicle.id,).all()
 
             # Creamos un diccionario con los estados recibidos desde el body, usando el partId como clave
-            states_dict = {state['part_id']: state for state in states_from_body}
-
+            states_dict = {str(state['part_id']): state for state in states_from_body}
+            
             # Se crean el estado de las partes y sus daños
             for vp in vehicle_parts:
                 part_state = states_dict.get(str(vp.part_id))
                 image_path = part_state.get("image_path") if part_state else None
+                print(f'{image_path}')
                 vps = VehiclePartState(
                     id=uuid.uuid4(),
                     vehicle_state_id=new_state.id,

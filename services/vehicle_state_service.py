@@ -124,7 +124,6 @@ image_top=None
 
     for state in states:
         part_id = state.get('part_id')
-        print(f"Procesando parte con ID: {part_id}")
         damages = state.get('damages')
         if not isinstance(damages, list) or not damages:
             raise ValueError(f"{errors['STATES_DATOS_INCORRECTOS']['codigo']}")
@@ -195,7 +194,7 @@ image_top=None
                 mime_type = get_image_mime_type(image_paths[f'reference_{image_type_required}'])
                 image_groups[image_type_required]["reference_image"] = image_paths[f'reference_{image_type_required}']
                 image_groups[image_type_required]["reference_mime_type"] = mime_type
-
+        print(f'Path de la imagen requerida {image_paths.get(image_type_required)}')
         state["image_path"] = image_paths.get(image_type_required)
         # Agregar parte y daño a la entrada correspondiente
         image_groups[image_type_required]["parts"].append({
@@ -231,13 +230,10 @@ image_top=None
 
     # acá se envia a al servicio de la ia
 
-    print(f"Estructura a enviar a la ia { analysis_object}")
-
-
     # Llamar a la IA con el prompt correspondiente
     result = call_llm(analysis_object, 'COMP' if previous_state else 'ALTA')
     parsed = clean_and_parse_llm_response(result)
-
+    print(f'Estados-------------------------${states}')
     state_to_use = VehicleStateRepository.save(vehicle_id, states, validation_reasons, date)
 
     # Guardar AIReport siempre

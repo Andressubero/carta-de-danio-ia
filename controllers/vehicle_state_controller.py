@@ -45,9 +45,6 @@ def create_vehicle_state():
 def get_all_vehicle_state():
     try:
         vehicle_states = get_all()
-        if not vehicle_states:
-            return jsonify({"message": "No se encontraron estados de vehículos"}), 404
-
         serialized_states = [vs.to_dict() for vs in vehicle_states]
         return jsonify(serialized_states), 200
     except Exception as e:

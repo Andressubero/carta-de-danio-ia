@@ -6,7 +6,6 @@ from auth.utils import admin_required
 vehicle_state_bp = Blueprint('states', __name__, url_prefix='/vehicle-state')
 
 @vehicle_state_bp.route('/create', methods=['POST'])
-@token_required
 def create_vehicle_state_route(): return create_vehicle_state()
 
 
