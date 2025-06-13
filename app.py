@@ -1,7 +1,7 @@
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 from sqlalchemy import text
 from config import Config
 from extensions import db
@@ -37,6 +37,10 @@ from flask import render_template, request, redirect, url_for, flash
 @app.route("/", methods=["GET"])
 def index():
     return render_template("carta.html")
+
+@app.route('/uploads/<path:filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 # app.py
 

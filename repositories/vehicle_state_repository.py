@@ -32,7 +32,7 @@ class VehicleStateRepository:
             
             # Se crean el estado de las partes y sus daños
             for vp in vehicle_parts:
-                part_state = states_dict.get(str(vp.part_id))
+                part_state = states_dict.get(str(vp.id))
                 image_path = part_state.get("image_path") if part_state else None
                 print(f'{image_path}')
                 vps = VehiclePartState(
