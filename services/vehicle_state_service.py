@@ -245,3 +245,21 @@ image_top=None
 
     # Retornar ambos
     return { "state": state_to_use, "ai_report": ai_report }
+
+
+def change_validation_state_service(validation_state, state_id, role_id):
+    try:
+        role = RoleRepository.get_by_id(role_id)  
+
+        if not role:
+            raise RuntimeError("El rol no existe")
+
+        if role.name.lower() == "admin":
+            return VehicleStateRepository.change_validation_state(state_id, validation_state)
+        else:
+            raise RuntimeError("Forbidden")
+    except AttributeError as e:
+        raise RuntimeError(f"Error en la obtención de datos: {str(e)}")
+    except Exception as e:
+        raise RuntimeError(f"Error inesperado: {str(e)}")
+

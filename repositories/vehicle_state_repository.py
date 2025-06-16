@@ -1,7 +1,7 @@
 from extensions import db
 from models.models import Vehicle, VehicleState, VehiclePart, VehicleTypePart, VehiclePartState, Part, Damage, DamageTypeEnum
 import uuid
-from datetime import date
+from datetime import date, datetime
 from constants.errors import errors
 
 class VehicleStateRepository:
@@ -20,7 +20,7 @@ class VehicleStateRepository:
             validation_reasons_string = ", ".join(item["reason"] for item in validation_reasons)
 
             # Se crea el estado del vehiculo
-            new_state = VehicleState(id=uuid.uuid4(), vehicle_id=vehicle.id, creation_date=date.today(),declared_date=declared_date, validation_reasons=validation_reasons_string if validation_reasons_string else None)
+            new_state = VehicleState(id=uuid.uuid4(), vehicle_id=vehicle.id, creation_date=datetime.utcnow(),declared_date=declared_date, validation_reasons=validation_reasons_string if validation_reasons_string else None)
             db.session.add(new_state)
             db.session.flush()
 
@@ -120,3 +120,13 @@ class VehicleStateRepository:
             .order_by(VehiclePartState.creation_date.desc())
             .first()
         )
+
+    @staticmethod
+    def change_validation_state(id, validation_state):
+        state = db.session.query(VehicleState).filter_by(id=id).first()
+        if state:
+            state.validation_state = validation_state
+            db.session.commit()
+        else:
+            raise ValueError(f"VehicleState con id {id} no encontrado.")
+

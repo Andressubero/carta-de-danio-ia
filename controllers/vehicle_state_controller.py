@@ -1,6 +1,5 @@
 from flask import request, jsonify, g
-from services.vehicle_state_service import create
-from services.vehicle_state_service import get_all
+from services.vehicle_state_service import create, change_validation_state_service, get_all
 import json
 
 def create_vehicle_state():
@@ -51,3 +50,26 @@ def get_all_vehicle_state():
         return jsonify(serialized_states), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+def change_validation_state():
+    try:
+        data = request.get_json()
+        state_id = data.get("id")
+        validation_state = data.get("validation_state")
+
+        if not state_id or not validation_state:
+            raise ValueError("Faltan datos requeridos")
+
+        role_id = g.get("role_id")
+        if not role_id:
+            raise RuntimeError("No se encontró el role_id")
+
+        change_validation_state_service(validation_state, state_id, role_id)
+
+        return jsonify({"message": "Estado cambiado correctamente"}), 200
+
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
