@@ -69,7 +69,7 @@ def call_llm(data, action):
         if 'reference_image' in image_entry and image_entry['reference_image']:
             reference_img_bytes = img_to_bytes(image_entry['reference_image'])
             reference_mime_type = image_entry['reference_mime_type']
-
+            print(f"Imagen de referencia {image_entry['reference_image']}")
             parts.append({
                 "inline_data": {
                     "mime_type": reference_mime_type,

@@ -1,5 +1,5 @@
 from flask import request, jsonify, g
-from services.vehicle_service import create, get_vehicles, get_vehicle_with_parts, get_vehicle_by_id
+from services.vehicle_service import create, get_vehicles, get_vehicle_with_parts, get_by_id
 from flask import request, jsonify
 from services.vehicle_service import  create
 
@@ -36,7 +36,7 @@ def get_vehicles_by_user_controller():
 
 def get_vehicle_by_id(vehicle_id):
     try:
-        vehicle = get_vehicle_by_id(vehicle_id)
+        vehicle = get_by_id(vehicle_id)
         if not vehicle:
             return jsonify({"message": "Vehicle not found"}), 404
         return jsonify(vehicle.to_dict()), 200

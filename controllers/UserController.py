@@ -21,7 +21,7 @@ def login_controller():
         )
         return response
     else:
-        return jsonify({'message': 'Credenciales inválidas'}), 200
+        return jsonify({'message': 'Credenciales inválidas'}), 403
     
 
 def logout_controller():

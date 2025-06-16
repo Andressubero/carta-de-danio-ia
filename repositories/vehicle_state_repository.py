@@ -81,7 +81,7 @@ class VehicleStateRepository:
         return (
             db.session.query(VehicleState)
             .filter_by(vehicle_id=vehicle_id)
-            .order_by(VehicleState.declared_date.asc())
+            .order_by(VehicleState.creation_date.desc())
             .all()
         )
     
@@ -89,7 +89,17 @@ class VehicleStateRepository:
     def get_all():
         return (
             db.session.query(VehicleState)
-            .order_by(VehicleState.declared_date.asc())
+            .order_by(VehicleState.creation_date.desc())
+            .all()
+        )
+
+    @staticmethod
+    def get_all_by_user(user_id):
+        return (
+            db.session.query(VehicleState)
+            .join(Vehicle)
+            .filter(Vehicle.user_id == user_id)
+            .order_by(VehicleState.creation_date.asc())
             .all()
         )
     
@@ -98,8 +108,8 @@ class VehicleStateRepository:
         return (
             db.session.query(VehicleState)
             .filter_by(vehicle_id=vehicle_id)
-            .order_by(VehicleState.declared_date.desc())  # Orden descendente (mayor fecha primero)
-            .first()  # Solo el primero (el más reciente)
+            .order_by(VehicleState.creation_date.desc())
+            .first()
         )
 
     @staticmethod

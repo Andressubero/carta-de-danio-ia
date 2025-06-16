@@ -134,8 +134,8 @@ class VehicleState(Base):
     __tablename__ = 'vehicle_state'
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     vehicle_id = Column(GUID(), ForeignKey('vehicle.id'))
-    creation_date = Column(Date, default=date.today)
-    validation_reasons = Column(String(255), nullable=True)
+    creation_date = Column(DateTime, default=datetime.utcnow)
+    validation_reasons = Column(Text, nullable=True)
     declared_date = Column(Date, default=date.today)
     validation_state = Column(Enum(ValidationStateEnum), default = ValidationStateEnum.PENDING)
     vehicle = relationship("Vehicle", back_populates="states")

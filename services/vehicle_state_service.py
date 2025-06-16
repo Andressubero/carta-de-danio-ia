@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from constants.errors import errors
 from flask import current_app as app
 from utils.ai import call_llm
+from repositories.role_repository import RoleRepository
 import json
 import uuid
 import os
@@ -52,12 +53,15 @@ def validate_parts(vehicle_parts, parts_from_body):
         return False, "Los IDs de partes no coinciden"
     return True, "Las partes coinciden"
 
-def get_all():
+def get_all(user_id, role_id):
     """
     Obtiene todos los estados de vehículos.
     """
     try:
-        return VehicleStateRepository.get_all()
+        role = RoleRepository.get_by_id(role_id) 
+        if role.name == 'admin':
+            return VehicleStateRepository.get_all()
+        return VehicleStateRepository.get_all_by_user(user_id) 
     except Exception as e:
         raise RuntimeError(f"Error al obtener los estados de vehículos: {str(e)}")
 

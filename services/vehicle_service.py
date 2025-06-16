@@ -37,7 +37,7 @@ def create(user_id, vehicle_type_id, model, brand, year, plate):
         }, 500
 
 
-def get_vehicle_by_id(id):
+def get_by_id(id):
     return VehicleRepository.get_by_id(id)
 
 def get_vehicle_with_parts(vehicle_id):

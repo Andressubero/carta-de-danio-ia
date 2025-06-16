@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import request, jsonify, g
 from services.vehicle_state_service import create
 from services.vehicle_state_service import get_all
 import json
@@ -44,10 +44,10 @@ def create_vehicle_state():
 
 def get_all_vehicle_state():
     try:
-        vehicle_states = get_all()
+        role_id = g.role_id
+        user_id = g.user_id
+        vehicle_states = get_all(user_id, role_id)
         serialized_states = [vs.to_dict() for vs in vehicle_states]
         return jsonify(serialized_states), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-

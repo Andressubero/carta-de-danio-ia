@@ -12,7 +12,9 @@ def create_vehicle_route(): return create_vehicle()
 @token_required
 def get_vehicles_by_user(): return get_vehicles_by_user_controller()
 
-vehicle_bp.route('/:id/', methods=['GET'])(get_vehicle_by_id)
+@vehicle_bp.route('/<string:vehicle_id>', methods=['GET'])
+@token_required
+def get_by_id(vehicle_id): return get_vehicle_by_id(vehicle_id)
 
 @vehicle_bp.route('vehicle-with-parts/<string:vehicle_id>', methods=['GET'])
 @token_required
