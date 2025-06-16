@@ -1,6 +1,7 @@
 from flask import request, jsonify, g
 from services.vehicle_state_service import create, change_validation_state_service, get_all
 import json
+import traceback
 
 def create_vehicle_state():
     vehicle_id = request.form.get('vehicle_id')
@@ -49,6 +50,8 @@ def get_all_vehicle_state():
         serialized_states = [vs.to_dict() for vs in vehicle_states]
         return jsonify(serialized_states), 200
     except Exception as e:
+        print("❌ Error en /vehicle-state/get-all:", e)
+        traceback.print_exc()  # 🔍 Esto imprime el traceback
         return jsonify({"error": str(e)}), 500
 
 def change_validation_state():
