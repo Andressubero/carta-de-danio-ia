@@ -26,7 +26,6 @@ initial_parts = [
 "Luz delantera derecha",
 "Luz trasera derecha",
 "Retrovisor derecho",
-"Retrovisor izquierdo",
 "Rueda delantera izquierda",
 "Rueda trasera izquierda",
 "Ventana delantera izquierda",
@@ -37,47 +36,21 @@ initial_parts = [
 "Guarda fango trasero izquierdo",
 "Luz delantera izquierda",
 "Luz trasera izquierda",
-#de motocicleta
-"Manillar izquierdo",
-"Manillar derecho",
-"Luz delantera",
-"Tanque",
-"Asiento",
-"Rueda delantera",
-"Rueda trasera",
-"Luz trasera",
-"Luz delantera lateral derecha",
-"Luz delantera lateral izquierda",
-"Guardabarro delantero",
-"Estribo izquierdo",
-"Estribo derecho",
-"Chasis lateral izquierdo",
-"Chasis lateral derecho",
-"Chasis trasero izquierdo",
-"Chasis trasero derecho",
-"Guardabarro trasero",
-"Tablero",
-# Pickup
-"Caja de carga",
+"Retrovisor izquierdo"
 ]
 
 def infer_image_type(part_name: str) -> ImageTypeEnum:
     name = part_name.lower()
-
-    if "chasis lateral derecho" in name or "chasis trasero derecho" in name:
-        return ImageTypeEnum.LATERAL_RIGHT
-    if "chasis lateral izquierdo" in name or "chasis trasero izquierdo" in name:
-        return ImageTypeEnum.LATERAL_LEFT
-    if "estribo" in name or "tablero" in name or "tanque" in name or "asiento" in name or "techo" in name:
-        return ImageTypeEnum.TOP
-    if "manillar" in name or "espejo retrovisor" in name or "luz delantera lateral" in name or "guardabarro delantero" in name or "rueda delantera" in name or "capó" in name or "parabrisas" in name or "paragolpes delantero" in name or "guarda fango delantero" in name:
-        return ImageTypeEnum.FRONT
-    if "luz trasera" in name or "guardabarro trasero" in name or "rueda trasera" in name or "baúl" in name or "luneta" in name or "paragolpes trasero" in name or "guarda fango trasero" in name:
-        return ImageTypeEnum.BACK
     if "derech" in name:
         return ImageTypeEnum.LATERAL_RIGHT
-    if "izquierd" in name:
+    elif "izquierd" in name:
         return ImageTypeEnum.LATERAL_LEFT
+    elif "capó" in name or "parabrisas" in name or "luz delantera" in name or "paragolpes delantero" in name or "guarda fango delantero" in name:
+        return ImageTypeEnum.FRONT
+    elif "baúl" in name or "luneta" in name or "paragolpes trasero" in name or "luz trasera" in name or "guarda fango trasero" in name:
+        return ImageTypeEnum.BACK
+    elif "techo" in name:
+        return ImageTypeEnum.TOP
     else:
         # Valor por defecto en caso de que no coincida nada (puedes ajustar esto)
         return ImageTypeEnum.TOP

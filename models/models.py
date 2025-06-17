@@ -150,7 +150,7 @@ class VehicleState(Base):
             "creation_date": self.creation_date.isoformat(),
             "validation_reasons": self.validation_reasons,
             "declared_date": self.declared_date.isoformat() if self.declared_date else None,
-            "validation_state": self.validation_state,  
+            "validation_state": self.validation_state.value,
             "parts_state": [part.to_dict() for part in self.parts_state]
         }
 
@@ -205,7 +205,7 @@ class Damage(Base):
     def to_dict(self):
         return {
             "id": str(self.id),
-            "damage_type": self.damage_type,
+            "damage_type": self.damage_type.value,
             "description": self.description,
             "fixed": self.fixed
         }

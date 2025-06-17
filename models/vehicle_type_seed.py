@@ -8,10 +8,7 @@ import uuid
 
 # Lista de partes a insertar
 initial_vehicles_type = [
-"Sedán", 
-"Motocicleta",
-"Hatchback",
-"Pickup",
+"Sedán"
 ]
 
 def seed_vehicles_type():
