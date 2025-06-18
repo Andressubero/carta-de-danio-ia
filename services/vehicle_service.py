@@ -1,4 +1,3 @@
-from sqlalchemy.orm import joinedload
 from repositories.vehicle_repository import VehicleRepository
 from models.models import Vehicle
 import uuid
@@ -76,4 +75,30 @@ def edit(vehicle_id, user_id, vehicle_type_id, model, brand, year, plate):
     except Exception as e:
         return {
             'message': f'Error al actualizar vehículo: {str(e)}'
+        }, 500
+    
+def delete(vehicle_id, user_id):
+    vehicle = VehicleRepository.get_by_id(vehicle_id)
+    
+    if not vehicle:
+        return {
+            'message': 'Vehículo no encontrado',
+            'success': False
+        }, 200
+
+    if str(vehicle.user_id) != user_id:
+        return {
+            'message': 'No tienes permiso para eliminar este vehículo',
+            'success': False
+        }, 200
+
+    try:
+        VehicleRepository.delete(vehicle)
+        return {
+            'message': 'Vehículo eliminado con éxito',
+            'success': True,
+        }, 200
+    except Exception as e:
+        return {
+            'message': f'Error al eliminar vehículo: {str(e)}'
         }, 500

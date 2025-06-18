@@ -1,5 +1,5 @@
 from flask import request, jsonify, g
-from services.vehicle_service import create, get_vehicles, get_vehicle_with_parts, get_by_id, edit
+from services.vehicle_service import create, get_vehicles, get_vehicle_with_parts, get_by_id, edit, delete
 from flask import request, jsonify
 from services.vehicle_service import  create
 
@@ -63,3 +63,12 @@ def edit_vehicle_controller(vehicle_id):
 
     result, status_code = edit(vehicle_id, user_id, vehicle_type_id, model, brand, year, plate)
     return jsonify(result), status_code
+
+def delete_vehicle_controller(vehicle_id):
+    user_id = g.user_id
+    result, status_code = delete(vehicle_id, user_id)
+
+    try:
+        return jsonify(result), status_code
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
