@@ -1,5 +1,5 @@
 from flask import request, jsonify, g
-from services.vehicle_service import create, get_vehicles, get_vehicle_with_parts, get_by_id
+from services.vehicle_service import create, get_vehicles, get_vehicle_with_parts, get_by_id, edit, delete
 from flask import request, jsonify
 from services.vehicle_service import  create
 
@@ -49,5 +49,26 @@ def get_vehicle_with_parts_by_id(vehicle_id):
         if not vehicle:
             return jsonify({"message": "Vehicle not found"}), 404
         return jsonify(vehicle.to_dict()), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+def edit_vehicle_controller(vehicle_id):
+    data = request.get_json()
+    user_id = g.user_id
+    vehicle_type_id = data.get('vehicle_type_id')
+    model = data.get('model')
+    brand = data.get('brand')
+    year = data.get('year')
+    plate = data.get('plate')
+
+    result, status_code = edit(vehicle_id, user_id, vehicle_type_id, model, brand, year, plate)
+    return jsonify(result), status_code
+
+def delete_vehicle_controller(vehicle_id):
+    user_id = g.user_id
+    result, status_code = delete(vehicle_id, user_id)
+
+    try:
+        return jsonify(result), status_code
     except Exception as e:
         return jsonify({"error": str(e)}), 500

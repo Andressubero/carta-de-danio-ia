@@ -12,10 +12,10 @@ errors = {
     "FECHA_FORMATO_INCORRECTO": {"codigo": "ERROR-11", "mensaje": "Formato de fecha inválido. Se espera 'YYYY-MM-DD'."},
     "DATOS_INSUFICIENTES": {"codigo": "ERROR-12", "mensaje": "Faltan datos necesarios para crear el estado del vehículo."},
     "ERROR_GUARDAR_VEHICULO": {"codigo": "ERROR-13", "mensaje": "Error al guardar el vehículo en la base de datos."},
-    "VEHICULO_NO_ENCONTRADO": {"codigo": "ERROR-14", "mensaje": "El vehículo no fue encontrado."},
     "ERROR_GUARDAR_ESTADO": {"codigo": "ERROR-15", "mensaje": "Error al guardar el estado del vehículo en la base de datos."},
     "VEHICULO_NO_ENCONTRADO": {"codigo": "ERROR-16", "mensaje": "Vehiculo no encontrado."},
     "ERROR_GUARDANDO_LA_IMAGEN": {"codigo": "ERROR-17", "mensaje": "Error inesperado guardando la imagen"},
     "REPORTE_NO_ENCONTRADO": {"codigo": "ERROR-18", "mensaje": "No se encontraró el reporte"},
-    "NO_AUTORIZADO": {"codigo": "ERROR-19", "mensaje": "No autorizado"}
+    "NO_AUTORIZADO": {"codigo": "ERROR-19", "mensaje": "No autorizado"},
+    "SIN_PERMISO_EDITAR_VEHICULO": {"codigo": "ERROR-20", "mensaje": "No tienes permiso para editar este vehículo"}
 }

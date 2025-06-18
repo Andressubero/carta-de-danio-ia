@@ -43,8 +43,11 @@ class VehicleRepository:
         return db.session.query(Vehicle).filter_by(id=id).first()
     
     @staticmethod
-    def get_all_by_user(id):     
-        return db.session.query(Vehicle).filter_by(user_id=id).all()
+    def get_all_by_user(id):
+        return db.session.query(Vehicle).filter(
+            Vehicle.user_id == id,
+            Vehicle.borrado == False
+        ).all()
     
     @staticmethod
     def get_vehicle_with_parts(vehicle_id):
@@ -52,3 +55,8 @@ class VehicleRepository:
             .options(joinedload(Vehicle.parts))\
             .filter(Vehicle.id == vehicle_id)\
             .first()
+    
+    @staticmethod
+    def delete(vehicle):
+        vehicle.borrado = True
+        db.session.commit()

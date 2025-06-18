@@ -106,6 +106,7 @@ class Vehicle(Base):
     brand = Column(String(255))
     year = Column(Integer)
     plate = Column(String(255), unique=True)
+    borrado = Column(Boolean, default=False)
 
     owner = relationship("User", back_populates="vehicles")
     type = relationship("VehicleType")
@@ -120,6 +121,7 @@ class Vehicle(Base):
             "brand": self.brand,
             "year": self.year,
             "plate": self.plate,
+            "borrado": self.borrado,
             "type": self.type.name if self.type else None,
             "parts": [
                         {
