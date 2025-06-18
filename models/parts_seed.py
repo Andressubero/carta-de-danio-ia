@@ -64,10 +64,6 @@ initial_parts = [
 def infer_image_type(part_name: str) -> ImageTypeEnum:
     name = part_name.lower()
 
-    if "chasis lateral derecho" in name or "chasis trasero derecho" in name:
-        return ImageTypeEnum.LATERAL_RIGHT
-    if "chasis lateral izquierdo" in name or "chasis trasero izquierdo" in name:
-        return ImageTypeEnum.LATERAL_LEFT
     if "estribo" in name or "tablero" in name or "tanque" in name or "asiento" in name or "techo" in name:
         return ImageTypeEnum.TOP
     if "manillar" in name or "espejo retrovisor" in name or "luz delantera lateral" in name or "guardabarro delantero" in name or "rueda delantera" in name or "capó" in name or "parabrisas" in name or "paragolpes delantero" in name or "guarda fango delantero" in name:
