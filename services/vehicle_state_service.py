@@ -89,10 +89,10 @@ image_back=None,
 image_top=None
 ):
     if not vehicle_id or not date:
-        raise ValueError(f"{errors['VEHICULO_NO_ENCONTRADO']['codigo']}")
+        raise ValueError(f"{errors['VEHICULO_NO_ENCONTRADO']['mensaje']}")
     
     if not isinstance(states, list):
-        raise ValueError(f"{errors['DATOS_INSUFICIENTES']['codigo']}")
+        raise ValueError(f"{errors['DATOS_INSUFICIENTES']['mensaje']}")
 
     available_images = {
         ImageTypeEnum.LATERAL_RIGHT: image_lateral_right,
@@ -105,7 +105,7 @@ image_top=None
     try:
         reference_date = datetime.strptime(date, "%Y-%m-%d")
     except ValueError:
-        raise ValueError(f"{errors['FECHA_FORMATO_INCORRECTO']['codigo']}")
+        raise ValueError(f"{errors['FECHA_FORMATO_INCORRECTO']['mensaje']}")
     
     vehicle = get_vehicle_with_parts(vehicle_id)
     if vehicle is None:
@@ -116,9 +116,9 @@ image_top=None
     #     # states debe coincidir con el length porque es el primer estado
     #     #is_valid, msg = validate_parts(vehicle.parts, states)
     #     #if not is_valid:
-    #     #    raise ValueError(f"{errors['DATOS_INSUFICIENTES']['codigo']}: {msg}")
+    #     #    raise ValueError(f"{errors['DATOS_INSUFICIENTES']['mensaje']}: {msg}")
     #     if not all([image_lateral_right, image_lateral_left, image_front, image_back, image_top]):
-    #         raise ValueError(f"{errors['DATOS_INSUFICIENTES']['codigo']}: El primer state requiere todas las imágenes") 
+    #         raise ValueError(f"{errors['DATOS_INSUFICIENTES']['mensaje']}: El primer state requiere todas las imágenes") 
 
     validation_reasons = []
     saved_images = set()
@@ -130,17 +130,17 @@ image_top=None
         part_id = state.get('part_id')
         damages = state.get('damages')
         if not isinstance(damages, list) or not damages:
-            raise ValueError(f"{errors['STATES_DATOS_INCORRECTOS']['codigo']}")
+            raise ValueError(f"{errors['STATES_DATOS_INCORRECTOS']['mensaje']}")
 
         if not part_id or not damages:
-            raise ValueError(f"{errors['STATES_DATOS_INCORRECTOS']['codigo']}")
+            raise ValueError(f"{errors['STATES_DATOS_INCORRECTOS']['mensaje']}")
         
         vehicle_part = db.session.query(VehiclePart).filter_by(id=part_id).first()
         if not vehicle_part:
-            raise ValueError(f"{errors['PARTE_NO_ENCONTRADA']['codigo']}")
+            raise ValueError(f"{errors['PARTE_NO_ENCONTRADA']['mensaje']}")
         part = db.session.query(Part).filter_by(id=vehicle_part.part_id).first()
         if not part:
-            raise ValueError(f"{errors['PARTE_NO_ENCONTRADA']['codigo']}")
+            raise ValueError(f"{errors['PARTE_NO_ENCONTRADA']['mensaje']}")
         
         image_type_required = part.image_type
         image_file = available_images.get(image_type_required)
@@ -149,7 +149,7 @@ image_top=None
 
         if not image_file:
             raise ValueError(
-                f"{errors['FALTA_IMAGEN']['codigo']}:{part.name}"
+                f"{errors['FALTA_IMAGEN']['mensaje']}:{part.name}"
             )
 
         capture_date = None
@@ -177,10 +177,10 @@ image_top=None
             if previous_state and f'reference_{image_type_required}' not in image_paths:
                 finded_vehicle_part = get_vehicle_part_by_part_id(vehicle, part.id)
                 if not finded_vehicle_part:
-                    raise ValueError(f"{errors['PARTE_NO_ENCONTRADA']['codigo']}:{part.name}")
+                    raise ValueError(f"{errors['PARTE_NO_ENCONTRADA']['mensaje']}:{part.name}")
                 last_vehicle_part_state = VehicleStateRepository.get_latest_vehicle_part_state_by_vehicle_part_id(finded_vehicle_part.id)
                 if not last_vehicle_part_state:
-                    raise ValueError(f"{errors['FALTA_REFERENCIA']['codigo']}:{part.name}")
+                    raise ValueError(f"{errors['FALTA_REFERENCIA']['mensaje']}:{part.name}")
 
                 reference_image_file = last_vehicle_part_state.image
                 image_paths[f'reference_{image_type_required}'] = reference_image_file
@@ -210,17 +210,17 @@ image_top=None
             image_file.seek(0)
             if capture_date.date() < reference_date.date():
                 validation_reasons.append({
-                    "reason": f"{errors['FECHA_TOMADA_ANTES']['codigo']}:{image_type_required}"
+                    "reason": f"{errors['FECHA_TOMADA_ANTES']['mensaje']}:{image_type_required}"
                 })
 
             if (capture_date.date() - reference_date.date()) > timedelta(days=90):
                 validation_reasons.append({
-                    "reason": f"{errors['FECHA_MAYOR_90_DIAS']['codigo']}:{image_type_required}"
+                    "reason": f"{errors['FECHA_MAYOR_90_DIAS']['mensaje']}:{image_type_required}"
                 })
         except ValueError as e:
-            validation_reasons.append({"reason": f"{errors['FECHA_NO_ENCONTRADA']['codigo']}:{image_type_required}"})
+            validation_reasons.append({"reason": f"{errors['FECHA_NO_ENCONTRADA']['mensaje']}:{image_type_required}"})
         except RuntimeError as e:
-            validation_reasons.append({"reason": f"{errors['ERROR_EXIF']['codigo']}:{image_type_required}"})
+            validation_reasons.append({"reason": f"{errors['ERROR_EXIF']['mensaje']}:{image_type_required}"})
         
 
     # Convertir a lista final
@@ -237,7 +237,6 @@ image_top=None
     # Llamar a la IA con el prompt correspondiente
     result = call_llm(analysis_object, 'COMP' if previous_state else 'ALTA')
     parsed = clean_and_parse_llm_response(result)
-    print(f'Estados-------------------------${states}')
     state_to_use = VehicleStateRepository.save(vehicle_id, states, validation_reasons, date)
 
     # Guardar AIReport siempre
