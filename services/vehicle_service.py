@@ -1,5 +1,6 @@
 from repositories.vehicle_repository import VehicleRepository
 from models.models import Vehicle
+from constants.errors import errors
 import uuid
 
 def create(user_id, vehicle_type_id, model, brand, year, plate):
@@ -50,15 +51,15 @@ def edit(vehicle_id, user_id, vehicle_type_id, model, brand, year, plate):
     
     if not vehicle:
         return {
-            'message': 'Vehículo no encontrado',
+            'message': errors['VEHICULO_NO_ENCONTRADO']['mensaje'],
             'success': False
         }, 200
 
     if str(vehicle.user_id) != user_id:
         return {
-            'message': 'No tienes permiso para editar este vehículo',
+            'message': errors['SIN_PERMISO_EDITAR_VEHICULO']['mensaje'],
             'success': False
-        }, 200
+        }, 403
 
     vehicle.vehicle_type_id = vehicle_type_id
     vehicle.model = model
