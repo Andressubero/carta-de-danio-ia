@@ -65,6 +65,12 @@ if __name__ == '__main__':
         seed_users()
         from models.vehicle_seed import seed_vehicles
         seed_vehicles()
+        from models.motorcicle_type_part_seed import seed_motorcycle_type_parts
+        seed_motorcycle_type_parts()
+        from models.pickup_type_part_seed import seed_pickup_type_parts
+        seed_pickup_type_parts()
+        from models.two_door_type_part_seed import seed_two_door_vehicles_type_parts
+        seed_vehicles_type_parts()
 
     app.run(debug=True)
 

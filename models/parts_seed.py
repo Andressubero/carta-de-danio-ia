@@ -36,7 +36,29 @@ initial_parts = [
 "Guarda fango trasero izquierdo",
 "Luz delantera izquierda",
 "Luz trasera izquierda",
-"Retrovisor izquierdo"
+"Retrovisor izquierdo",
+#de motocicleta
+"Manillar izquierdo",
+"Manillar derecho",
+"Luz delantera",
+"Tanque",
+"Asiento",
+"Rueda delantera",
+"Rueda trasera",
+"Luz trasera",
+"Luz delantera lateral derecha",
+"Luz delantera lateral izquierda",
+"Guardabarro delantero",
+"Estribo izquierdo",
+"Estribo derecho",
+"Chasis lateral izquierdo",
+"Chasis lateral derecho",
+"Chasis trasero izquierdo",
+"Chasis trasero derecho",
+"Guardabarro trasero",
+"Tablero",
+# Pickup
+"Caja de carga",
 ]
 
 def infer_image_type(part_name: str) -> ImageTypeEnum:
@@ -45,11 +67,11 @@ def infer_image_type(part_name: str) -> ImageTypeEnum:
         return ImageTypeEnum.LATERAL_RIGHT
     elif "izquierd" in name:
         return ImageTypeEnum.LATERAL_LEFT
-    elif "capó" in name or "parabrisas" in name or "luz delantera" in name or "paragolpes delantero" in name or "guarda fango delantero" in name:
+    elif "capó" in name or "parabrisas" in name or "luz delantera" in name or "paragolpes delantero" in name or "guarda fango delantero" in name or "manillar" in name or "guardabarro delantero" in name or "rueda delantera" in name or "capó" in name or "parabrisas" in name or "paragolpes delantero" in name or "guarda fango delantero" in name:
         return ImageTypeEnum.FRONT
-    elif "baúl" in name or "luneta" in name or "paragolpes trasero" in name or "luz trasera" in name or "guarda fango trasero" in name:
+    elif "baúl" in name or "luneta" in name or "paragolpes trasero" in name or "luz trasera" in name or "guarda fango trasero" in name or "guardabarro trasero" in name or "rueda trasera" in name:
         return ImageTypeEnum.BACK
-    elif "techo" in name:
+    elif "techo" in name or "estribo" in name or "tablero" in name or "tanque" in name or "asiento" in name:
         return ImageTypeEnum.TOP
     else:
         # Valor por defecto en caso de que no coincida nada (puedes ajustar esto)
