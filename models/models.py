@@ -35,7 +35,7 @@ class GUID(TypeDecorator):
 # Enum para tipo de daño
 class DamageTypeEnum(str, enum.Enum):
     ABOLLADURA = "ABOLLADURA"
-    RALLON = "RALLON"
+    RAYON = "RAYON"
     OTRO = "OTRO"
     SIN_DANO = "SIN_DANO"
     ROTURA = "ROTURA"

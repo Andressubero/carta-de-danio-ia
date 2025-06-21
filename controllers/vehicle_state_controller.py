@@ -13,14 +13,7 @@ def create_vehicle_state():
     image_front = request.files.get('front')
     image_back = request.files.get('back')
     image_top = request.files.get('top')
-    print("Received images:", {
-        "lateral_right": image_lateral_right,
-        "lateral_left": image_lateral_left,
-        "front": image_front,
-        "back": image_back,
-        "top": image_top
-    })
-    print("Received parts:", states)
+
 
     try:
         vehicle_state = create(
@@ -37,10 +30,8 @@ def create_vehicle_state():
             "message": "Estado del vehículo creado exitosamente",
         }), 201
     except ValueError as ve:
-        print(f'ValueError: {ve}')
         return jsonify({"error": str(ve)}), 400
     except Exception as e:
-        print(f'Exception: {e}')
         return jsonify({"error": str(e)}), 500
 
 
