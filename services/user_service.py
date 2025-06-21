@@ -7,6 +7,17 @@ from models.models import User
 from werkzeug.security import generate_password_hash
 from services.role_service import get_role_by_name
 import uuid
+import re
+
+def validar_password(password):
+    if not 8 <= len(password) <= 15:
+        raise ValueError("La contraseña debe tener entre 8 y 15 caracteres")
+
+    if not re.search(r"\d", password):
+        raise ValueError("La contraseña debe contener al menos un número")
+
+    if not re.search(r"[^\w\s]", password):  # busca un carácter especial
+        raise ValueError("La contraseña debe contener al menos un carácter especial")
 
 def login_user(username, password):
     user = db.session.query(User).filter_by(username=username).first()
@@ -34,6 +45,8 @@ def create_user_service(username, email, password):
     existing_email = db.session.query(User).filter_by(email=email).first()
     if existing_email:
         return {"success": False, "message": "Ya hay una cuenta registrada con este email"}, 200
+
+    validar_password(password)
 
     hashed_password = generate_password_hash(password)
 
@@ -68,3 +81,19 @@ def get_all_users_service():
 
 def get_user_by_id(user_id):
     return db.session.query(User).get(user_id)
+
+def edit_password_service(user_id, new_password):
+    if not user_id or not new_password:
+        raise ValueError("Faltan datos")
+
+    validar_password(new_password)
+
+    user = db.session.query(User).filter_by(id=user_id).first()
+    if not user:
+        raise ValueError("Usuario no encontrado")
+
+    hashed_password = generate_password_hash(new_password)
+    user.password = hashed_password
+    db.session.commit()
+
+    return user

@@ -1,5 +1,5 @@
 from flask import request, jsonify, make_response, g
-from services.user_service import login_user, create_user_service, get_all_users_service, get_user_by_id
+from services.user_service import login_user, create_user_service, get_all_users_service, get_user_by_id, edit_password_service
 
 def login_controller():
     data = request.get_json()
@@ -56,3 +56,16 @@ def get_me():
         return jsonify({'message': 'Usuario no encontrado'}), 404
 
     return jsonify(user.to_dict()), 200
+
+
+
+def edit_password_controller():
+    data = request.get_json()
+    password = data.get('password')
+    try:
+        edit_password_service(g.user_id, password)
+        return jsonify('Password actualizada'), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500 
