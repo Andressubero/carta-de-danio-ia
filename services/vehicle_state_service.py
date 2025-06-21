@@ -173,7 +173,6 @@ image_top=None
             saved_images.add(image_type_required)
 
             reference_image_file = None
-        
             if previous_state and f'reference_{image_type_required}' not in image_paths:
                 finded_vehicle_part = get_vehicle_part_by_part_id(vehicle, part.id)
                 if not finded_vehicle_part:
@@ -181,7 +180,6 @@ image_top=None
                 last_vehicle_part_state = VehicleStateRepository.get_latest_vehicle_part_state_by_vehicle_part_id(finded_vehicle_part.id)
                 if not last_vehicle_part_state:
                     raise ValueError(f"{errors['FALTA_REFERENCIA']['mensaje']}:{part.name}")
-
                 reference_image_file = last_vehicle_part_state.image
                 image_paths[f'reference_{image_type_required}'] = reference_image_file
 
@@ -198,7 +196,6 @@ image_top=None
                 mime_type = get_image_mime_type(image_paths[f'reference_{image_type_required}'])
                 image_groups[image_type_required]["reference_image"] = image_paths[f'reference_{image_type_required}']
                 image_groups[image_type_required]["reference_mime_type"] = mime_type
-        print(f'Path de la imagen requerida {image_paths.get(image_type_required)}')
         state["image_path"] = image_paths.get(image_type_required)
         # Agregar parte y daño a la entrada correspondiente
         image_groups[image_type_required]["parts"].append({
@@ -257,6 +254,15 @@ def change_validation_state_service(validation_state, state_id, role_id):
             return VehicleStateRepository.change_validation_state(state_id, validation_state)
         else:
             raise RuntimeError("Forbidden")
+    except AttributeError as e:
+        raise RuntimeError(f"Error en la obtención de datos: {str(e)}")
+    except Exception as e:
+        raise RuntimeError(f"Error inesperado: {str(e)}")
+
+
+def is_first_state_service(vehicle_id):
+    try:
+        return VehicleStateRepository.is_first_state(vehicle_id)
     except AttributeError as e:
         raise RuntimeError(f"Error en la obtención de datos: {str(e)}")
     except Exception as e:

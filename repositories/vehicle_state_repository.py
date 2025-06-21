@@ -34,7 +34,9 @@ class VehicleStateRepository:
             for vp in vehicle_parts:
                 part_state = states_dict.get(str(vp.id))
                 image_path = part_state.get("image_path") if part_state else None
-                print(f'{image_path}')
+                if not image_path:
+                    print(f"⚠️ Parte {vp.id} omitida: sin imagen")
+                    continue
                 vps = VehiclePartState(
                     id=uuid.uuid4(),
                     vehicle_state_id=new_state.id,
@@ -129,4 +131,12 @@ class VehicleStateRepository:
             db.session.commit()
         else:
             raise ValueError(f"VehicleState con id {id} no encontrado.")
+    
+    @staticmethod
+    def is_first_state(vehicle_id):
+        state = db.session.query(VehicleState).filter_by(vehicle_id=vehicle_id).first()
+        if state:
+            return False
+        else:
+            return True
 

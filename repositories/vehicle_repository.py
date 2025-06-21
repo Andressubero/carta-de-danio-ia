@@ -21,15 +21,20 @@ class VehicleRepository:
                 .filter(VehicleTypePart.vehicle_type_id == vehicle.vehicle_type_id)
                 .all()
             )
-
             for part in parts:
-                vp = VehiclePart(
-                    id=uuid.uuid4(),
-                    name=part.name,
+                exists = db.session.query(VehiclePart).filter_by(
                     vehicle_id=vehicle.id,
                     part_id=part.id
-                )
-                db.session.add(vp)
+                ).first()
+
+                if not exists:
+                    vp = VehiclePart(
+                        id=uuid.uuid4(),
+                        name=part.name,
+                        vehicle_id=vehicle.id,
+                        part_id=part.id
+                    )
+                    db.session.add(vp)
 
             db.session.commit()
         except Exception as e:

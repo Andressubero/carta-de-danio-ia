@@ -77,13 +77,13 @@ def call_llm(data, action):
                 }
             })
 
-    # Logueamos lo que se va a enviar (opcional)
-    print(">>> Enviando a la IA los siguientes parts:")
-    for i, part in enumerate(parts):
-        if 'text' in part:
-            print(f"Part {i}: Text prompt ({len(part['text'])} chars)")
-        else:
-            print(f"Part {i}: Image with mime_type = {part['inline_data']['mime_type']} ({len(part['inline_data']['data'])} bytes)")
+    # # Logueamos lo que se va a enviar (opcional)
+    # print(">>> Enviando a la IA los siguientes parts:")
+    # for i, part in enumerate(parts):
+    #     if 'text' in part:
+    #         print(f"Part {i}: Text prompt ({len(part['text'])} chars)")
+    #     else:
+    #         print(f"Part {i}: Image with mime_type = {part['inline_data']['mime_type']} ({len(part['inline_data']['data'])} bytes)")
 
     # 3️⃣ Llamamos a la IA
     model = genai.GenerativeModel(os.getenv('GEMINI_MODEL'))
