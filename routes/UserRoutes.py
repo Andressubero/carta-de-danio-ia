@@ -1,5 +1,5 @@
 from flask import Blueprint
-from controllers.UserController import login_controller, create_user_controller, get_all_users_controller, get_me
+from controllers.UserController import login_controller, create_user_controller, get_all_users_controller, get_me, edit_password_controller
 from auth.utils import token_required
 from controllers.UserController import logout_controller
 from auth.utils import admin_required
@@ -20,3 +20,8 @@ def get_all_users_route():
 @token_required
 def get_me_route():
     return get_me()
+
+@user_bp.route('/edit-password', methods=['POST'])
+@token_required
+def edit_password_route():
+    return edit_password_controller()
