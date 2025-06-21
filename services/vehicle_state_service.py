@@ -173,20 +173,23 @@ image_top=None
             saved_images.add(image_type_required)
 
             reference_image_file = None
-        
+            print(f'Empiezo a revisar el estado previo')
             if previous_state and f'reference_{image_type_required}' not in image_paths:
+                print(f'Empiezo a revisar el estado previo si no esta la imagen de referencia')
                 finded_vehicle_part = get_vehicle_part_by_part_id(vehicle, part.id)
                 if not finded_vehicle_part:
                     raise ValueError(f"{errors['PARTE_NO_ENCONTRADA']['mensaje']}:{part.name}")
                 last_vehicle_part_state = VehicleStateRepository.get_latest_vehicle_part_state_by_vehicle_part_id(finded_vehicle_part.id)
                 if not last_vehicle_part_state:
                     raise ValueError(f"{errors['FALTA_REFERENCIA']['mensaje']}:{part.name}")
-
+                print(f'Imagen de referencia encontrada {last_vehicle_part_state.image} del estado {last_vehicle_part_state.id}')
                 reference_image_file = last_vehicle_part_state.image
                 image_paths[f'reference_{image_type_required}'] = reference_image_file
 
             image_paths[image_type_required] = image_path
+            print(f'image_path {image_path}')
             mime_type = get_image_mime_type(image_path)
+            print(f'mime_type {mime_type}')
             # Crear entrada en el diccionario si no existe
             image_groups[image_type_required] = {
                 "image": image_path,
@@ -195,8 +198,11 @@ image_top=None
                 "parts": []
             }
             if previous_state and f'reference_{image_type_required}' in image_paths:
+                print(f'entramos al if de la 200')
                 mime_type = get_image_mime_type(image_paths[f'reference_{image_type_required}'])
+                print(f'mime_type {mime_type}')
                 image_groups[image_type_required]["reference_image"] = image_paths[f'reference_{image_type_required}']
+                # print(f'image_groups[image_type_required]["reference_image"] {image_paths[f'reference_{image_type_required}']}')
                 image_groups[image_type_required]["reference_mime_type"] = mime_type
         print(f'Path de la imagen requerida {image_paths.get(image_type_required)}')
         state["image_path"] = image_paths.get(image_type_required)
@@ -257,6 +263,15 @@ def change_validation_state_service(validation_state, state_id, role_id):
             return VehicleStateRepository.change_validation_state(state_id, validation_state)
         else:
             raise RuntimeError("Forbidden")
+    except AttributeError as e:
+        raise RuntimeError(f"Error en la obtención de datos: {str(e)}")
+    except Exception as e:
+        raise RuntimeError(f"Error inesperado: {str(e)}")
+
+
+def is_first_state_service(vehicle_id):
+    try:
+        return VehicleStateRepository.is_first_state(vehicle_id)
     except AttributeError as e:
         raise RuntimeError(f"Error en la obtención de datos: {str(e)}")
     except Exception as e:

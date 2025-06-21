@@ -1,5 +1,5 @@
 from flask import request, jsonify, g
-from services.vehicle_state_service import create, change_validation_state_service, get_all
+from services.vehicle_state_service import create, change_validation_state_service, get_all, is_first_state_service
 import json
 
 def create_vehicle_state():
@@ -20,6 +20,7 @@ def create_vehicle_state():
         "back": image_back,
         "top": image_top
     })
+    print("Received parts:", states)
 
     try:
         vehicle_state = create(
@@ -36,8 +37,10 @@ def create_vehicle_state():
             "message": "Estado del vehículo creado exitosamente",
         }), 201
     except ValueError as ve:
+        print(f'ValueError: {ve}')
         return jsonify({"error": str(ve)}), 400
     except Exception as e:
+        print(f'Exception: {e}')
         return jsonify({"error": str(e)}), 500
 
 
@@ -67,6 +70,18 @@ def change_validation_state():
         change_validation_state_service(validation_state, state_id, role_id)
 
         return jsonify({"message": "Estado cambiado correctamente"}), 200
+
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+        
+def is_first_state(vehicle_id):
+    try:
+        if not vehicle_id:
+            raise ValueError("Faltan datos requeridos")
+        isFirst = is_first_state_service(vehicle_id)
+        return jsonify({"isFirst": bool(isFirst)}), 200
 
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
