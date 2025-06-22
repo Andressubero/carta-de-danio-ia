@@ -39,11 +39,11 @@ initial_two_door_type_part_seed = [
 ]
 
 
-def seed_two_door_vehicles_type_parts():
+def seed_hatchback_vehicles_type_parts():
     # Buscar el vehicle_type por nombre
     vehicle_type = db.session.query(VehicleType).filter_by(name="Hatchback").first()
     if not vehicle_type:
-        print("❌ VehicleType 'Sedán' no encontrado. Ejecutá primero el seed de VehicleType.")
+        print("❌ VehicleType 'Hatchback' no encontrado. Ejecutá primero el seed de VehicleType.")
         return
 
     for part_name in initial_two_door_type_part_seed:
@@ -63,4 +63,4 @@ def seed_two_door_vehicles_type_parts():
             db.session.add(new_relation)
 
     db.session.commit()
-    print("✅ Seeding de vehicle_type_parts completado.")
+    print("----------------------------✅ Seeding de vehicle_type_parts para Hatchback completado.------------------------------")
