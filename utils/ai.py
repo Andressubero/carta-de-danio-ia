@@ -64,9 +64,11 @@ def call_llm(data, action):
                 "data": img_bytes
             }
         })
-
+        
         # Si hay imagen de referencia, la agregamos también
         if 'reference_image' in image_entry and image_entry['reference_image']:
+            r = image_entry['reference_image']
+            print(f'Imagen de referencia {r}')
             reference_img_bytes = img_to_bytes(image_entry['reference_image'])
             reference_mime_type = image_entry['reference_mime_type']
             print(f"Imagen de referencia {image_entry['reference_image']}")
