@@ -8,7 +8,7 @@ from models.models import ImageTypeEnum, Part, VehiclePart
 from datetime import datetime, timedelta
 from constants.errors import errors
 from flask import current_app as app
-from utils.ai import call_llm
+from utils.openAI import call_llm
 from repositories.role_repository import RoleRepository
 import json
 import uuid
@@ -233,11 +233,20 @@ image_top=None
 
     # Llamar a la IA con el prompt correspondiente
     result = call_llm(analysis_object, 'COMP' if previous_state else 'ALTA')
-    parsed = clean_and_parse_llm_response(result)
+    # 2️⃣ Inicializamos parsed y ai_report en caso de error
+    parsed = None
+    ai_report = None
+    
+    if result:
+        try:
+            parsed = clean_and_parse_llm_response(result)
+        except Exception as e:
+            print(f"Error al parsear respuesta de la IA: {e}")
+    
     state_to_use = VehicleStateRepository.save(vehicle_id, states, validation_reasons, date)
 
-    # Guardar AIReport siempre
-    ai_report = AIReportRepository.save(parsed, state_to_use.id)
+    if parsed:
+        ai_report = AIReportRepository.save(parsed, state_to_use.id)
 
     # Retornar ambos
     return { "state": state_to_use, "ai_report": ai_report }
