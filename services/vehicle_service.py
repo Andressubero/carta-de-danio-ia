@@ -9,7 +9,7 @@ def create(user_id, vehicle_type_id, model, brand, year, plate):
         return {
             'message': 'Vehículo existente',
             'success': False
-        }, 200
+        }, 400
 
     # Crear instancia del vehículo
     vehicle = Vehicle(
@@ -53,7 +53,7 @@ def edit(vehicle_id, user_id, vehicle_type_id, model, brand, year, plate):
         return {
             'message': errors['VEHICULO_NO_ENCONTRADO']['mensaje'],
             'success': False
-        }, 200
+        }, 404
 
     if str(vehicle.user_id) != user_id:
         return {
@@ -85,13 +85,13 @@ def delete(vehicle_id, user_id):
         return {
             'message': 'Vehículo no encontrado',
             'success': False
-        }, 200
+        }, 404
 
     if str(vehicle.user_id) != user_id:
         return {
             'message': 'No tienes permiso para eliminar este vehículo',
             'success': False
-        }, 200
+        }, 403
 
     try:
         VehicleRepository.delete(vehicle)

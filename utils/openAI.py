@@ -48,13 +48,26 @@ def get_prompt(action):
 
 # --- 🧠 GEMINI ---
 def call_gemini(data, action):
+    genai.configure(api_key=os.getenv('OPENAI_API_KEY_GEMINI'))
     prompt = get_prompt(action)
     parts = []
 
     parts.append({'text': prompt + ' ' + str(data)})
 
     for image_entry in data["states"]:
+        #Imagen de referencia
+        if 'reference_image' in image_entry and image_entry['reference_image']:
+            ref_bytes = img_to_bytes(image_entry['reference_image'])
+            parts.append({'text': 'La siguiente imagen es de referencia'})
+            parts.append({
+                "inline_data": {
+                    "mime_type": image_entry["reference_mime_type"],
+                    "data": ref_bytes
+                }
+            })
+        #Imagen actual
         img_bytes = img_to_bytes(image_entry['image'])
+        parts.append({'text': 'La siguiente imagen es actual'})
         parts.append({
             "inline_data": {
                 "mime_type": image_entry["mime_type"],
@@ -62,17 +75,8 @@ def call_gemini(data, action):
             }
         })
 
-        if 'reference_image' in image_entry and image_entry['reference_image']:
-            ref_bytes = img_to_bytes(image_entry['reference_image'])
-            parts.append({
-                "inline_data": {
-                    "mime_type": image_entry["reference_mime_type"],
-                    "data": ref_bytes
-                }
-            })
-
     model = genai.GenerativeModel(os.getenv('GEMINI_MODEL'))
-
+    print(f'----------------consultando a gemini------------------')
     try:
         response = model.generate_content([
             {'role': 'user', 'parts': parts}
@@ -96,6 +100,21 @@ def call_openai(data, action):
     }]
 
     for idx, image_entry in enumerate(data["states"]):
+
+        # Imagen de referencia (si existe)
+        if 'reference_image' in image_entry and image_entry['reference_image']:
+            print(f"Imagen de referencia {image_entry['reference_image']}")
+            ref_b64 = encode_image_to_base64(image_entry["reference_image"])
+            input_data[0]["content"].append({
+                "type": "input_image",
+                "image_url": ref_b64,
+                "detail": "high"
+            })
+            input_data[0]["content"].append({
+                "type": "input_text",
+                "text": f"La imagen anterior muestra el estado anterior del vehiculo (parte {idx + 1})."
+            })
+
         # Imagen actual
         image_b64 = encode_image_to_base64(image_entry["image"])
         input_data[0]["content"].append({
@@ -108,20 +127,8 @@ def call_openai(data, action):
             "text": f"La imagen anterior muestra el estado actual del vehículo (parte {idx + 1})."
         })
 
-        # Imagen de referencia (si existe)
-        if 'reference_image' in image_entry and image_entry['reference_image']:
-            ref_b64 = encode_image_to_base64(image_entry["reference_image"])
-            input_data[0]["content"].append({
-                "type": "input_image",
-                "image_url": ref_b64,
-                "detail": "high"
-            })
-            input_data[0]["content"].append({
-                "type": "input_text",
-                "text": f"La imagen anterior muestra el estado anterior del vehiculo (parte {idx + 1})."
-            })
 
-
+    print(f'----------------consultando a gpt------------------')
     try:
         response = client.responses.create(
             model=os.getenv("OPENAI_MODEL", "gpt-4o"),

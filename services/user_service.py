@@ -36,15 +36,15 @@ def login_user(username, password):
 
 def create_user_service(username, email, password):
     if not username or not email or not password:
-        return {"success": False, "message": "Faltan datos"}, 200
+        return {"success": False, "message": "Faltan datos"}, 400
     
     existing_user = db.session.query(User).filter_by(username=username).first()
     if existing_user:
-        return {"success": False, "message": "Ya hay una cuenta registrada con este usuario"}, 200
+        return {"success": False, "message": "Ya hay una cuenta registrada con este usuario"}, 400
     
     existing_email = db.session.query(User).filter_by(email=email).first()
     if existing_email:
-        return {"success": False, "message": "Ya hay una cuenta registrada con este email"}, 200
+        return {"success": False, "message": "Ya hay una cuenta registrada con este email"}, 400
 
     validar_password(password)
 

@@ -10,15 +10,9 @@ import uuid
 # Lista de usuarios a insertar
 initial_users = [
     {
-    "username": "test_user",
-    "email": "user@email.com",
-    "password": "password",
-    "role": "user"
-    },
-        {
-    "username": "admin_user",
+    "username": "admin@email.com",
     "email": "admin@email.com",
-    "password": "password",
+    "password": "Password#1",
     "role": "admin"
     }
 ]
