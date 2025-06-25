@@ -12,7 +12,6 @@ from routes.vehicles_routes import vehicle_bp
 from routes.vehicle_state_routes import vehicle_state_bp 
 from routes.vehicle_type_routes import vehicle_types_bp
 from routes.ai_report_routes import report_bp
-from utils.ai import call_llm
 
 load_dotenv()
 app = Flask(__name__)
