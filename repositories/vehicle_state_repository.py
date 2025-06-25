@@ -101,7 +101,7 @@ class VehicleStateRepository:
             db.session.query(VehicleState)
             .join(Vehicle)
             .filter(Vehicle.user_id == user_id)
-            .order_by(VehicleState.creation_date.asc())
+            .order_by(VehicleState.creation_date.desc())
             .all()
         )
     
