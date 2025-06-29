@@ -158,6 +158,7 @@ class VehicleState(Base):
     def to_summary_dict(self):
         return {
             "id": str(self.id),
+            "vehicle_id": str(self.vehicle_id),
             "creation_date": self.creation_date.isoformat(),
             "vehicle_brand": self.vehicle.brand if self.vehicle else None,
             "vehicle_model": self.vehicle.model if self.vehicle else None,
