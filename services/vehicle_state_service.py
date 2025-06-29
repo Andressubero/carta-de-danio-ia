@@ -65,6 +65,30 @@ def get_all(user_id, role_id):
     except Exception as e:
         raise RuntimeError(f"Error al obtener los estados de vehículos: {str(e)}")
 
+def get_by_id(role_id: str, id: str):
+    """
+    Obtiene un estado de vehículo por ID, validando rol de administrador.
+    """
+    try:
+        role = RoleRepository.get_by_id(role_id)
+        if not role or role.name != 'admin':
+            raise PermissionError("Acceso denegado: se requiere rol de administrador.")
+        return VehicleStateRepository.get_by_id(id)
+    except Exception as e:
+        raise RuntimeError(f"Error al obtener el estado del vehículo: {str(e)}")
+
+def get_all_summary(user_id, role_id):
+    """
+    Obtiene todos los estados de vehículos.
+    """
+    try:
+        role = RoleRepository.get_by_id(role_id) 
+        if role.name == 'admin':
+            return VehicleStateRepository.get_all_summary()
+        return VehicleStateRepository.get_all_by_user_summary(user_id) 
+    except Exception as e:
+        raise RuntimeError(f"Error al obtener los estados de vehículos: {str(e)}")
+
 def get_image_mime_type(path):
     img = Image.open(path)
     format = img.format

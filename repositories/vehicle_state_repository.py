@@ -96,7 +96,30 @@ class VehicleStateRepository:
         )
 
     @staticmethod
+    def get_by_id(id):
+        query = db.session.query(VehicleState).filter(VehicleState.id == id)
+        return query.order_by(VehicleState.creation_date.desc()).first()
+
+    @staticmethod
+    def get_all_summary():
+        return (
+            db.session.query(VehicleState)
+            .order_by(VehicleState.creation_date.desc())
+            .all()
+        )
+
+    @staticmethod
     def get_all_by_user(user_id):
+        return (
+            db.session.query(VehicleState)
+            .join(Vehicle)
+            .filter(Vehicle.user_id == user_id)
+            .order_by(VehicleState.creation_date.desc())
+            .all()
+        )
+
+    @staticmethod
+    def get_all_by_user_summary(user_id):
         return (
             db.session.query(VehicleState)
             .join(Vehicle)

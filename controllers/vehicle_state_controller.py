@@ -1,5 +1,5 @@
 from flask import request, jsonify, g
-from services.vehicle_state_service import create, change_validation_state_service, get_all, is_first_state_service
+from services.vehicle_state_service import create, change_validation_state_service, get_all, is_first_state_service, get_all_summary, get_by_id
 import json
 
 def create_vehicle_state():
@@ -41,6 +41,25 @@ def get_all_vehicle_state():
         user_id = g.user_id
         vehicle_states = get_all(user_id, role_id)
         serialized_states = [vs.to_dict() for vs in vehicle_states]
+        return jsonify(serialized_states), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+def get_state_by_id(id):
+    try:
+        role_id = g.role_id
+        vs = get_by_id(role_id, id)
+        serialized_state = vs.to_dict()
+        return jsonify(serialized_state), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+def get_all_vehicle_state_summary():
+    try:
+        role_id = g.role_id
+        user_id = g.user_id
+        vehicle_states = get_all_summary(user_id, role_id)
+        serialized_states = [vs.to_summary_dict() for vs in vehicle_states]
         return jsonify(serialized_states), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
