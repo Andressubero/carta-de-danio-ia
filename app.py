@@ -1,7 +1,7 @@
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, request, send_from_directory, send_file, abort
 from sqlalchemy import text
 from config import Config
 from extensions import db
@@ -12,6 +12,8 @@ from routes.vehicles_routes import vehicle_bp
 from routes.vehicle_state_routes import vehicle_state_bp 
 from routes.vehicle_type_routes import vehicle_types_bp
 from routes.ai_report_routes import report_bp
+from PIL import Image
+import io
 
 load_dotenv()
 app = Flask(__name__)
@@ -39,7 +41,39 @@ def index():
 
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+    if not os.path.isfile(file_path):
+        abort(404, description="Archivo no encontrado")
+
+    # Redimensionar y comprimir imagen
+    try:
+        with Image.open(file_path) as img:
+            # Convertimos a RGB para evitar errores con PNGs con transparencia
+            img = img.convert('RGB')
+
+            # Redimensionar si es muy grande (por ejemplo, ancho máx. 800px)
+            max_width = 400
+            if img.width > max_width:
+                ratio = max_width / float(img.width)
+                new_height = int(float(img.height) * ratio)
+                img = img.resize((max_width, new_height), Image.LANCZOS)
+
+            # Guardamos en un buffer en memoria como JPEG con compresión
+            img_io = io.BytesIO()
+            img.save(img_io, format='JPEG', quality=70)  # calidad entre 1-100 (70 es un buen balance)
+            img_io.seek(0)
+
+            return send_file(
+                img_io,
+                mimetype='image/jpeg',
+                download_name='compressed.jpg'
+            )
+    except Exception as e:
+        print(f"❌ Error procesando imagen: {e}")
+        abort(500, description="Error procesando imagen")
+
+    
 
 # app.py
 

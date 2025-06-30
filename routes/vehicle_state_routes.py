@@ -1,5 +1,5 @@
 from flask import Blueprint
-from controllers.vehicle_state_controller import create_vehicle_state, get_all_vehicle_state, change_validation_state, is_first_state
+from controllers.vehicle_state_controller import create_vehicle_state, get_all_vehicle_state, change_validation_state, is_first_state, get_all_vehicle_state_summary, get_state_by_id
 from auth.utils import token_required
 from auth.utils import admin_required
 
@@ -13,6 +13,10 @@ def create_vehicle_state_route(): return create_vehicle_state()
 @token_required
 def get_all_vehicle_state_route(): return get_all_vehicle_state()
 
+@vehicle_state_bp.route('/get-all-summary', methods=['GET'])
+@token_required
+def get_all_vehicle_state_summary_route(): return get_all_vehicle_state_summary()
+
 @vehicle_state_bp.route('/change-state', methods=['POST'])
 @token_required
 def change_validation_state_route(): return change_validation_state()
@@ -20,5 +24,9 @@ def change_validation_state_route(): return change_validation_state()
 @vehicle_state_bp.route('/is-first-state/<string:vehicle_id>', methods=['GET'])
 @token_required
 def is_first_state_route(vehicle_id): return is_first_state(vehicle_id)
+
+@vehicle_state_bp.route('/get-by-id/<string:id>', methods=['GET'])
+@token_required
+def get_by_id_route(id): return get_state_by_id(id)
 
 
